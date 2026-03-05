@@ -26,6 +26,10 @@ def create_app(config_name='development'):
     def load_user(user_id):
         return User.query.get(int(user_id))
     
+    # Create data folder if it doesn't exist (for database)
+    data_folder = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data')
+    os.makedirs(data_folder, exist_ok=True)
+    
     # Create upload folder if it doesn't exist
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
     os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], 'notes'), exist_ok=True)
