@@ -27,13 +27,25 @@ def create_app(config_name='development'):
         return User.query.get(int(user_id))
     
     # Create data folder if it doesn't exist (for database)
-    data_folder = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data')
-    os.makedirs(data_folder, exist_ok=True)
+    # Skip on Vercel (read-only filesystem)
+    if not os.getenv('VERCEL'):
+        try:
+            data_folder = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data')
+            os.makedirs(data_folder, exist_ok=True)
+        except OSError:
+            # Silent fail on read-only filesystems
+            pass
     
     # Create upload folder if it doesn't exist
-    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-    os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], 'notes'), exist_ok=True)
-    os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], 'certificates'), exist_ok=True)
+    # Skip on Vercel (read-only filesystem)
+    if not os.getenv('VERCEL'):
+        try:
+            os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+            os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], 'notes'), exist_ok=True)
+            os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], 'certificates'), exist_ok=True)
+        except OSError:
+            # Silent fail on read-only filesystems
+            pass
     
     # Register blueprints
     from app.auth import auth_bp

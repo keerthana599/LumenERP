@@ -4,9 +4,18 @@ from datetime import timedelta
 basedir = os.path.abspath(os.path.dirname(__file__))
 project_root = os.path.dirname(basedir)
 
+# Detect if running on Vercel (serverless environment)
+is_vercel = os.getenv('VERCEL') == '1'
+
+# Use /tmp for database on Vercel, local data/ folder otherwise
+if is_vercel:
+    db_uri = 'sqlite:////tmp/erp_system.db'
+else:
+    db_uri = os.getenv('DATABASE_URL', f'sqlite:///{project_root}/data/erp_system.db')
+
 class Config:
     """Base configuration"""
-    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', f'sqlite:///{project_root}/data/erp_system.db')
+    SQLALCHEMY_DATABASE_URI = db_uri
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SECRET_KEY = os.getenv('SECRET_KEY', 'dev-key-change-in-production')
     
