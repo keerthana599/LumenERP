@@ -1,0 +1,219 @@
+{% extends "base_portal.html" %}
+
+{% block title %}Admin Dashboard - College ERP{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Top Stats Row -->
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+        <!-- Total Students -->
+        <div class="bg-white rounded-lg shadow p-6 border-l-4 border-blue-500">
+            <div class="flex items-start justify-between mb-2">
+                <div>
+                    <p class="text-gray-500 text-xs uppercase tracking-wide">Total Students</p>
+                    <p class="text-3xl font-bold text-gray-900 mt-1">{{ stats.total_students }}</p>
+                </div>
+                <i class="fas fa-graduation-cap text-blue-300 text-2xl opacity-60"></i>
+            </div>
+            <p class="text-xs text-gray-500"><i class="fas fa-arrow-up text-green-500 mr-1"></i>+12 this month</p>
+        </div>
+
+        <!-- Faculty Members -->
+        <div class="bg-white rounded-lg shadow p-6 border-l-4 border-green-500">
+            <div class="flex items-start justify-between mb-2">
+                <div>
+                    <p class="text-gray-500 text-xs uppercase tracking-wide">Faculty Members</p>
+                    <p class="text-3xl font-bold text-gray-900 mt-1">{{ stats.total_faculty }}</p>
+                </div>
+                <i class="fas fa-chalkboard-user text-green-300 text-2xl opacity-60"></i>
+            </div>
+            <p class="text-xs text-gray-500"><i class="fas fa-arrow-up text-green-500 mr-1"></i>+3 this month</p>
+        </div>
+
+        <!-- Pending Leaves -->
+        <div class="bg-white rounded-lg shadow p-6 border-l-4 border-orange-500">
+            <div class="flex items-start justify-between mb-2">
+                <div>
+                    <p class="text-gray-500 text-xs uppercase tracking-wide">Pending Leaves</p>
+                    <p class="text-3xl font-bold text-gray-900 mt-1">{{ stats.pending_leaves }}</p>
+                </div>
+                <i class="fas fa-hourglass-end text-orange-300 text-2xl opacity-60"></i>
+            </div>
+            <p class="text-xs text-orange-600 font-medium">Awaiting approval</p>
+        </div>
+
+        <!-- Certificates Issued -->
+        <div class="bg-white rounded-lg shadow p-6 border-l-4 border-purple-500">
+            <div class="flex items-start justify-between mb-2">
+                <div>
+                    <p class="text-gray-500 text-xs uppercase tracking-wide">Certificates Issued</p>
+                    <p class="text-3xl font-bold text-gray-900 mt-1">{{ stats.certificates_issued }}</p>
+                </div>
+                <i class="fas fa-certificate text-purple-300 text-2xl opacity-60"></i>
+            </div>
+            <p class="text-xs text-gray-500">This semester</p>
+        </div>
+
+        <!-- Total Users -->
+        <div class="bg-white rounded-lg shadow p-6 border-l-4 border-red-500">
+            <div class="flex items-start justify-between mb-2">
+                <div>
+                    <p class="text-gray-500 text-xs uppercase tracking-wide">Total Users</p>
+                    <p class="text-3xl font-bold text-gray-900 mt-1">{{ stats.total_users }}</p>
+                </div>
+                <i class="fas fa-users text-red-300 text-2xl opacity-60"></i>
+            </div>
+            <p class="text-xs text-gray-500">All roles</p>
+        </div>
+    </div>
+
+    <!-- Quick Actions Row -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <!-- Manage Departments -->
+        <a href="{{ url_for('admin.manage_departments') }}" class="bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-lg shadow-lg p-6 text-white hover:shadow-xl transition transform hover:scale-105">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm opacity-90">Manage</p>
+                    <p class="text-2xl font-bold">Departments</p>
+                </div>
+                <i class="fas fa-building text-3xl opacity-40"></i>
+            </div>
+        </a>
+
+        <!-- Manage Courses -->
+        <a href="{{ url_for('admin.manage_courses') }}" class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-lg p-6 text-white hover:shadow-xl transition transform hover:scale-105">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm opacity-90">Manage</p>
+                    <p class="text-2xl font-bold">Courses</p>
+                </div>
+                <i class="fas fa-book-open text-3xl opacity-40"></i>
+            </div>
+        </a>
+
+        <!-- Manage Faculty -->
+        <a href="{{ url_for('admin.manage_faculty') }}" class="bg-gradient-to-br from-green-500 to-green-600 rounded-lg shadow-lg p-6 text-white hover:shadow-xl transition transform hover:scale-105">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm opacity-90">Manage</p>
+                    <p class="text-2xl font-bold">Faculty</p>
+                </div>
+                <i class="fas fa-chalkboard-user text-3xl opacity-40"></i>
+            </div>
+        </a>
+
+        <!-- Manage Students -->
+        <a href="{{ url_for('admin.manage_students') }}" class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg shadow-lg p-6 text-white hover:shadow-xl transition transform hover:scale-105">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm opacity-90">Manage</p>
+                    <p class="text-2xl font-bold">Students</p>
+                </div>
+                <i class="fas fa-user-graduate text-3xl opacity-40"></i>
+            </div>
+        </a>
+    </div>
+
+    <!-- Middle Section: Notifications & Recent Activity -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Notifications -->
+        <div class="bg-white rounded-lg shadow">
+            <div class="p-6 border-b border-gray-200">
+                <h3 class="text-lg font-bold text-gray-900 flex items-center">
+                    <i class="fas fa-bell text-blue-600 mr-2"></i>
+                    Notifications
+                </h3>
+                <p class="text-xs text-gray-500 mt-1">Important alerts and updates</p>
+            </div>
+            <div class="divide-y max-h-64 overflow-y-auto">
+                {% if notifications %}
+                    {% for notification in notifications %}
+                        <div class="p-4 hover:bg-gray-50 transition">
+                            <div class="flex items-start">
+                                <i class="fas fa-info-circle text-blue-500 mt-1 mr-3 flex-shrink-0"></i>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-900">{{ notification.title }}</p>
+                                    <p class="text-xs text-gray-500 mt-1">
+                                        {{ notification.created_at.strftime('%Y-%m-%d %H:%M') }}
+                                        · {{ notification.notification_type|capitalize }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="p-4 text-center text-gray-500 text-sm">
+                        No active notifications.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Recent Activity (based on pending leaves) -->
+        <div class="bg-white rounded-lg shadow">
+            <div class="p-6 border-b border-gray-200">
+                <h3 class="text-lg font-bold text-gray-900 flex items-center">
+                    <i class="fas fa-history text-green-600 mr-2"></i>
+                    Recent Activity
+                </h3>
+                <p class="text-xs text-gray-500 mt-1">Latest pending leave requests</p>
+            </div>
+            <div class="divide-y max-h-64 overflow-y-auto">
+                {% if pending_leaves %}
+                    {% for leave in pending_leaves[:10] %}
+                        <div class="p-4 hover:bg-gray-50 transition border-l-4 border-transparent hover:border-blue-500">
+                            <div class="flex items-start justify-between">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-900">
+                                        Leave request from {{ leave.user.username }}
+                                    </p>
+                                    <p class="text-xs text-gray-500 mt-1">
+                                        {{ leave.start_date }} to {{ leave.end_date }} · {{ leave.status|capitalize }}
+                                    </p>
+                                </div>
+                                <i class="fas fa-file-alt text-blue-500"></i>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="p-4 text-center text-gray-500 text-sm">
+                        No pending leave requests.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="bg-white rounded-lg shadow">
+        <div class="p-6 border-b border-gray-200">
+            <h3 class="text-lg font-bold text-gray-900 flex items-center">
+                <i class="fas fa-lightning-bolt text-yellow-500 mr-2"></i>
+                Quick Actions
+            </h3>
+            <p class="text-xs text-gray-500 mt-1">Common administrative tasks</p>
+        </div>
+        <div class="p-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+            <a href="{{ url_for('admin.manage_leaves') }}" class="flex flex-col items-center justify-center p-4 bg-gray-50 hover:bg-blue-50 rounded-lg transition border border-gray-200 hover:border-blue-300 group">
+                <i class="fas fa-check-circle text-blue-600 text-2xl mb-2 group-hover:scale-110 transition"></i>
+                <span class="text-sm font-medium text-gray-700 text-center">Review Leave Requests</span>
+            </a>
+
+            <a href="{{ url_for('admin.upload_certificate') }}" class="flex flex-col items-center justify-center p-4 bg-gray-50 hover:bg-green-50 rounded-lg transition border border-gray-200 hover:border-green-300 group">
+                <i class="fas fa-certificate text-green-600 text-2xl mb-2 group-hover:scale-110 transition"></i>
+                <span class="text-sm font-medium text-gray-700 text-center">Upload Certificates</span>
+            </a>
+
+            <a href="{{ url_for('admin.manage_staff') }}" class="flex flex-col items-center justify-center p-4 bg-gray-50 hover:bg-purple-50 rounded-lg transition border border-gray-200 hover:border-purple-300 group">
+                <i class="fas fa-users-cog text-purple-600 text-2xl mb-2 group-hover:scale-110 transition"></i>
+                <span class="text-sm font-medium text-gray-700 text-center">Manage Staff</span>
+            </a>
+
+            <a href="{{ url_for('admin.manage_timetable') }}" class="flex flex-col items-center justify-center p-4 bg-gray-50 hover:bg-orange-50 rounded-lg transition border border-gray-200 hover:border-orange-300 group">
+                <i class="fas fa-chart-bar text-orange-600 text-2xl mb-2 group-hover:scale-110 transition"></i>
+                <span class="text-sm font-medium text-gray-700 text-center">Generate Reports</span>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

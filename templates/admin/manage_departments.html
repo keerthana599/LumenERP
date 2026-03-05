@@ -1,0 +1,159 @@
+{% extends "base_portal.html" %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 py-4 sm:py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-6 sm:mb-8">
+            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+                <div class="min-w-0">
+                    <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-800 flex items-center flex-wrap gap-2">
+                        <i class="fas fa-building text-blue-600"></i>
+                        <span>Manage Departments</span>
+                    </h1>
+                    <p class="text-gray-600 mt-2 text-sm sm:text-base">Create, edit, and manage academic departments</p>
+                </div>
+                <a href="{{ url_for('admin.add_department') }}" class="w-full sm:w-auto inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition shadow-lg hover:shadow-xl">
+                    <i class="fas fa-plus mr-2"></i>Add Department
+                </a>
+            </div>
+        </div>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="mb-6 p-4 rounded-lg border-l-4 {% if category == 'danger' %}bg-red-50 border-red-500 text-red-700{% else %}bg-green-50 border-green-500 text-green-700{% endif %}">
+                        <div class="flex items-center">
+                            <i class="fas {% if category == 'danger' %}fa-exclamation-circle{% else %}fa-check-circle{% endif %} mr-3"></i>
+                            <span>{{ message }}</span>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Stats Card -->
+        {% if departments.items %}
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-lg p-6 text-white">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-blue-100 text-sm font-semibold">Total Departments</p>
+                        <p class="text-4xl font-bold mt-2">{{ departments.total }}</p>
+                    </div>
+                    <i class="fas fa-building text-3xl opacity-20"></i>
+                </div>
+            </div>
+            <div class="bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-lg shadow-lg p-6 text-white">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-indigo-100 text-sm font-semibold">Departments Page</p>
+                        <p class="text-4xl font-bold mt-2">{{ departments.page }}/{{ departments.pages }}</p>
+                    </div>
+                    <i class="fas fa-list text-3xl opacity-20"></i>
+                </div>
+            </div>
+            <div class="bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-lg shadow-lg p-6 text-white">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-cyan-100 text-sm font-semibold">Records per Page</p>
+                        <p class="text-4xl font-bold mt-2">{{ departments.items|length }}</p>
+                    </div>
+                    <i class="fas fa-database text-3xl opacity-20"></i>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Departments Table -->
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200">
+            {% if departments.items %}
+            <div class="overflow-x-auto table-responsive">
+                <table class="w-full min-w-[600px]">
+                    <thead class="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
+                        <tr>
+                            <th class="px-4 sm:px-6 py-3 sm:py-4 text-left font-semibold text-sm sm:text-base">Code</th>
+                            <th class="px-6 py-4 text-left font-semibold">Department Name</th>
+                            <th class="px-6 py-4 text-left font-semibold">Department Head</th>
+                            <th class="px-6 py-4 text-left font-semibold">Email</th>
+                            <th class="px-6 py-4 text-left font-semibold">Phone</th>
+                            <th class="px-6 py-4 text-center font-semibold">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        {% for dept in departments.items %}
+                            <tr class="hover:bg-blue-50 transition duration-200">
+                                <td class="px-6 py-4">
+                                    <span class="inline-block bg-blue-100 text-blue-800 font-bold px-3 py-1 rounded-full text-sm">{{ dept.code }}</span>
+                                </td>
+                                <td class="px-6 py-4 font-semibold text-gray-800">{{ dept.name }}</td>
+                                <td class="px-6 py-4 text-gray-700">{{ dept.head or '<span class="text-gray-400 italic">Not assigned</span>'|safe }}</td>
+                                <td class="px-6 py-4 text-gray-700">
+                                    {% if dept.email %}
+                                        <a href="mailto:{{ dept.email }}" class="text-blue-600 hover:underline">{{ dept.email }}</a>
+                                    {% else %}
+                                        <span class="text-gray-400 italic">Not provided</span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-6 py-4 text-gray-700">{{ dept.phone or '<span class="text-gray-400 italic">Not provided</span>'|safe }}</td>
+                                <td class="px-6 py-4 text-center">
+                                    <a href="{{ url_for('admin.edit_department', dept_id=dept.id) }}" class="inline-flex items-center bg-amber-500 hover:bg-amber-600 text-white font-semibold py-2 px-3 rounded-lg transition mr-2" title="Edit">
+                                        <i class="fas fa-pen-to-square"></i>
+                                    </a>
+                                    <form method="POST" action="{{ url_for('admin.delete_department', dept_id=dept.id) }}" class="inline-block" onsubmit="return confirm('Delete this department? This will also remove all associated students, faculty, courses, and staff in this department. Continue?');">
+                                        <button type="submit" class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-3 rounded-lg transition" title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="py-12 text-center">
+                <i class="fas fa-box-open text-4xl text-gray-300 mb-4"></i>
+                <p class="text-gray-500 text-lg mb-4">No departments found in the system</p>
+                <p class="text-gray-400 mb-6">Start by creating a new department</p>
+                <a href="{{ url_for('admin.add_department') }}" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition">
+                    <i class="fas fa-plus mr-2"></i>Create First Department
+                </a>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Pagination -->
+        {% if departments.pages > 1 %}
+            <div class="mt-8 flex justify-center items-center space-x-2">
+                {% if departments.has_prev %}
+                    <a href="{{ url_for('admin.manage_departments', page=departments.prev_num) }}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition">
+                        <i class="fas fa-chevron-left mr-1"></i>Previous
+                    </a>
+                {% endif %}
+                
+                <div class="flex items-center space-x-1">
+                    {% for page_num in departments.iter_pages() %}
+                        {% if page_num %}
+                            {% if page_num == departments.page %}
+                                <span class="bg-blue-600 text-white font-bold py-2 px-3 rounded-lg">{{ page_num }}</span>
+                            {% else %}
+                                <a href="{{ url_for('admin.manage_departments', page=page_num) }}" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-3 rounded-lg transition">{{ page_num }}</a>
+                            {% endif %}
+                        {% else %}
+                            <span class="text-gray-400">...</span>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                
+                {% if departments.has_next %}
+                    <a href="{{ url_for('admin.manage_departments', page=departments.next_num) }}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition">
+                        Next<i class="fas fa-chevron-right ml-1"></i>
+                    </a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

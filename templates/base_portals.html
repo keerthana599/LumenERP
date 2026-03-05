@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}College ERP Portal{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background-color: #f5f5f5; }
+        .sidebar-menu a { transition: all 0.3s ease; }
+        .sidebar-menu a:hover { transform: translateX(5px); }
+        .menu-active { background-color: #000; color: white; border-radius: 6px; }
+        .stat-card { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .notification-badge { background: #ff4757; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+        @media (max-width: 768px) {
+            .portals-sidebar { position: fixed; left: 0; top: 0; height: 100%; z-index: 40; transform: translateX(-100%); transition: transform 0.3s ease; max-width: 85vw; width: 12rem; }
+            .portals-open .portals-sidebar { transform: translateX(0); }
+            .portals-backdrop { display: none; }
+            .portals-open .portals-backdrop { display: block !important; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 30; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="flex h-screen" id="portalsContainer">
+        <div id="portalsBackdrop" class="portals-backdrop hidden" aria-hidden="true"></div>
+        <!-- Sidebar -->
+        <div class="portals-sidebar w-48 flex-shrink-0 bg-white shadow-lg md:relative md:translate-x-0">
+            <div class="p-4 sm:p-6 border-b border-gray-200">
+                <h1 class="text-base sm:text-lg font-bold text-gray-800">{% block portal_title %}Portal{% endblock %}</h1>
+                <p class="text-xs sm:text-sm text-gray-600 truncate">{% block user_info %}User{% endblock %}</p>
+            </div>
+
+            <nav class="p-3 sm:p-4 sidebar-menu">
+                {% block menu %}{% endblock %}
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col min-w-0">
+            <!-- Header -->
+            <header class="bg-white shadow">
+                <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4 flex justify-between items-center gap-2 flex-wrap">
+                    <div class="flex items-center gap-2 sm:gap-4">
+                        <button type="button" id="portalsMenuBtn" class="md:hidden p-2 rounded-lg text-gray-600 hover:bg-gray-100" aria-label="Toggle menu">
+                            <i class="fas fa-bars"></i>
+                        </button>
+                        {% block header_info %}{% endblock %}
+                    </div>
+                    <div class="flex items-center gap-3 sm:gap-6">
+                        <button class="text-gray-600 hover:text-gray-800 p-2 sm:p-0">
+                            <i class="fas fa-bell text-lg"></i>
+                        </button>
+                        <a href="{{ url_for('auth.logout') }}" class="text-gray-600 hover:text-gray-800 flex items-center gap-2 text-sm sm:text-base">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Logout</span>
+                        </a>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <main class="flex-1 overflow-auto p-4 sm:p-6 lg:p-8">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }} mb-4 p-4 rounded-lg {% if category == 'danger' %}bg-red-100 text-red-800{% elif category == 'success' %}bg-green-100 text-green-800{% else %}bg-blue-100 text-blue-800{% endif %}" role="alert">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                {% block content %}{% endblock %}
+            </main>
+        </div>
+    </div>
+    <script>
+    (function() {
+        var container = document.getElementById('portalsContainer');
+        var btn = document.getElementById('portalsMenuBtn');
+        var backdrop = document.getElementById('portalsBackdrop');
+        if (btn) btn.addEventListener('click', function() { container.classList.toggle('portals-open'); });
+        if (backdrop) backdrop.addEventListener('click', function() { container.classList.remove('portals-open'); });
+    })();
+    </script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

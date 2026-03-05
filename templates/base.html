@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}College ERP System{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav id="navbar" class="bg-gradient-to-r from-blue-600 to-blue-800 shadow-lg transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo & Toggle -->
+                <div class="flex items-center gap-2 sm:gap-4 min-w-0">
+                    <input type="checkbox" id="navbarCheckbox" class="sr-only">
+                    <label for="navbarCheckbox" class="toggleNavbar flex-shrink-0 p-2 -m-2 cursor-pointer touch-manipulation" aria-label="Toggle navigation">
+                        <i class="fas fa-bars toggle-icon-bars text-white text-xl" id="navbarBarsIcon"></i>
+                        <i class="fas fa-times toggle-icon-close text-white text-xl" id="navbarCloseIcon" style="display: none;"></i>
+                    </label>
+                    <a href="/" class="flex items-center min-w-0">
+                        <i class="fas fa-graduation-cap text-white text-xl sm:text-2xl mr-2 sm:mr-3 flex-shrink-0"></i>
+                        <span class="text-white font-bold text-lg sm:text-xl truncate">College ERP</span>
+                    </a>
+                </div>
+                
+                <!-- Main Nav Links (desktop) -->
+                {% if current_user.is_authenticated %}
+                <div class="hidden md:flex space-x-6 lg:space-x-8">
+                    {% if current_user.role == 'faculty' %}
+                    <a href="{{ url_for('main.timetable') }}" class="text-blue-100 hover:text-white whitespace-nowrap">Timetable</a>
+                    <a href="{{ url_for('main.staff_list') }}" class="text-blue-100 hover:text-white whitespace-nowrap">Staff</a>
+                    {% elif current_user.role == 'admin' %}
+                    <a href="{{ url_for('admin.users') }}" class="text-blue-100 hover:text-white whitespace-nowrap">Users</a>
+                    <a href="{{ url_for('admin.students') }}" class="text-blue-100 hover:text-white whitespace-nowrap">Students</a>
+                    {% endif %}
+                    <a href="{{ url_for('main.timetable') }}" class="text-blue-100 hover:text-white whitespace-nowrap">Timetable</a>
+                </div>
+                {% endif %}
+                
+                <!-- User Menu -->
+                <div class="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
+                    {% if current_user.is_authenticated %}
+                    <div class="relative group" id="userMenuContainer">
+                        <button type="button" id="userMenuButton" class="text-white bg-blue-700 px-3 py-2 sm:px-4 rounded hover:bg-blue-600 flex items-center min-h-[44px] touch-manipulation">
+                            <i class="fas fa-user mr-2"></i>
+                            <span class="hidden sm:inline truncate max-w-[100px] md:max-w-[140px]">{{ current_user.username }}</span>
+                        </button>
+                        <div id="userMenuDropdown" class="absolute right-0 mt-1 w-48 bg-white rounded shadow-lg hidden md:group-hover:block z-10 user-dropdown">
+                            <div class="px-4 py-2 border-b text-gray-700">
+                                <p class="text-sm">Role: <strong>{{ current_user.role.title() }}</strong></p>
+                            </div>
+                            <a href="{{ url_for('auth.logout') }}" class="block px-4 py-3 text-gray-700 hover:bg-gray-100">
+                                <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                            </a>
+                        </div>
+                    </div>
+                    {% else %}
+                    <a href="{{ url_for('auth.login') }}" class="bg-white text-blue-600 px-3 py-2 sm:px-4 rounded font-semibold hover:bg-gray-100 min-h-[44px] inline-flex items-center">
+                        Login
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 flash-message" role="alert">
+                <div class="flex p-4 rounded-lg {% if category == 'success' %}bg-green-100 text-green-700{% elif category == 'danger' %}bg-red-100 text-red-700{% else %}bg-blue-100 text-blue-700{% endif %}">
+                    <i class="fas fa-{% if category == 'success' %}check-circle{% elif category == 'danger' %}exclamation-circle{% else %}info-circle{% endif %} mr-3"></i>
+                    <span>{{ message }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-gray-400 mt-6 sm:mt-8 py-4 sm:py-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm sm:text-base">
+            <p>&copy; 2026 College ERP System. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Floating Toggle Button (shown when navbar is hidden) -->
+    <button id="floatingToggle" class="hidden fixed bottom-6 right-6 bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-lg transition z-50" title="Show Navigation">
+        <i class="fas fa-bars text-xl"></i>
+    </button>
+
+    <style>
+        /* Hidden navbar state */
+        #navbar.navbar-hidden {
+            transform: translateY(-100%);
+            display: none;
+        }
+
+        #floatingToggle {
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .user-dropdown.open { display: block !important; }
+    </style>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var btn = document.getElementById('userMenuButton');
+        var dropdown = document.getElementById('userMenuDropdown');
+        if (btn && dropdown) {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                dropdown.classList.toggle('open');
+            });
+            document.addEventListener('click', function() { dropdown.classList.remove('open'); });
+            dropdown.addEventListener('click', function(e) { e.stopPropagation(); });
+        }
+    });
+    </script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

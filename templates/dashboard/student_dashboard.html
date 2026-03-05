@@ -1,0 +1,119 @@
+{% extends "base_student_portal.html" %}
+
+{% block title %}Student Dashboard - College ERP{% endblock %}
+
+{% block content %}
+<div class="w-full grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+    <!-- Main Content (2/3 width) -->
+    <div class="lg:col-span-2 space-y-6 min-w-0">
+        <!-- Quick Stats -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6">
+            <!-- Attendance -->
+            <div class="bg-white rounded-lg shadow p-6 border-b-4 border-blue-500">
+                <div class="flex items-start justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm mb-1">Attendance</p>
+                        <p class="text-3xl font-bold text-gray-800">{{ attendance_percentage }}%</p>
+                        <p class="text-xs text-gray-500 mt-1">This semester</p>
+                    </div>
+                    <i class="fas fa-bookmark text-blue-400 text-3xl opacity-40"></i>
+                </div>
+            </div>
+
+            <!-- Pending Fees -->
+            <div class="bg-white rounded-lg shadow p-6 border-b-4 border-red-500">
+                <div class="flex items-start justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm mb-1">Pending Fees</p>
+                        <p class="text-3xl font-bold text-gray-800">₹{{ "%.0f"|format(pending_fees) }}</p>
+                        <p class="text-xs text-gray-500 mt-1">{% if fee_due_date %}Due by {{ fee_due_date.strftime('%b %d, %Y') }}{% else %}No pending due date{% endif %}</p>
+                    </div>
+                    <i class="fas fa-rupee-sign text-red-400 text-3xl opacity-40"></i>
+                </div>
+            </div>
+
+            <!-- New Notes -->
+            <div class="bg-white rounded-lg shadow p-6 border-b-4 border-green-500">
+                <div class="flex items-start justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm mb-1">New Notes</p>
+                        <p class="text-3xl font-bold text-gray-800">{{ new_notes_count }}</p>
+                        <p class="text-xs text-gray-500 mt-1">This week</p>
+                    </div>
+                    <i class="fas fa-book text-green-400 text-3xl opacity-40"></i>
+                </div>
+            </div>
+
+            <!-- CGPA -->
+            <div class="bg-white rounded-lg shadow p-6 border-b-4 border-purple-500">
+                <div class="flex items-start justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm mb-1">CGPA</p>
+                        <p class="text-3xl font-bold text-gray-800">{{ cgpa if cgpa is not none else '—' }}</p>
+                        <p class="text-xs text-gray-500 mt-1">Current</p>
+                    </div>
+                    <i class="fas fa-star text-purple-400 text-3xl opacity-40"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="bg-white rounded-lg shadow">
+            <div class="p-6 border-b">
+                <h2 class="text-lg font-semibold text-gray-800 flex items-center">
+                    <i class="fas fa-lightning-bolt text-yellow-500 mr-2"></i>
+                    Quick Actions
+                </h2>
+                <p class="text-xs text-gray-500 mt-1">Access frequently used features</p>
+            </div>
+            <div class="p-6 space-y-3">
+                <a href="{{ url_for('student.view_attendance') }}" class="flex items-center p-3 hover:bg-gray-50 rounded-lg transition group cursor-pointer">
+                    <i class="fas fa-calendar-check text-blue-600 text-lg mr-3 group-hover:text-blue-700"></i>
+                    <span class="text-gray-700 font-medium group-hover:text-gray-900">View Attendance</span>
+                </a>
+                <a href="{{ url_for('main.timetable') }}" class="flex items-center p-3 hover:bg-gray-50 rounded-lg transition group cursor-pointer">
+                    <i class="fas fa-clock text-green-600 text-lg mr-3 group-hover:text-green-700"></i>
+                    <span class="text-gray-700 font-medium group-hover:text-gray-900">Check Timetable</span>
+                </a>
+                <a href="{{ url_for('student.view_notes') }}" class="flex items-center p-3 hover:bg-gray-50 rounded-lg transition group cursor-pointer">
+                    <i class="fas fa-download text-purple-600 text-lg mr-3 group-hover:text-purple-700"></i>
+                    <span class="text-gray-700 font-medium group-hover:text-gray-900">Download Notes</span>
+                </a>
+                <a href="{{ url_for('student.apply_leave') }}" class="flex items-center p-3 hover:bg-gray-50 rounded-lg transition group cursor-pointer">
+                    <i class="fas fa-paper-plane text-orange-600 text-lg mr-3 group-hover:text-orange-700"></i>
+                    <span class="text-gray-700 font-medium group-hover:text-gray-900">Apply for Leave</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notifications Panel (1/3 width) -->
+    <div class="lg:col-span-1 min-w-0">
+        <div class="bg-white rounded-lg shadow">
+            <div class="p-6 border-b">
+                <h2 class="text-lg font-semibold text-gray-800 flex items-center">
+                    <i class="fas fa-bell text-blue-600 mr-2"></i>
+                    Notifications
+                </h2>
+                <p class="text-xs text-gray-500 mt-1">Recent updates and announcements</p>
+            </div>
+            <div class="divide-y max-h-96 overflow-y-auto">
+                {% if notifications %}
+                    {% for n in notifications %}
+                    <div class="p-4 hover:bg-gray-50">
+                        <p class="text-sm font-medium text-gray-800">{{ n.title }}</p>
+                        {% if n.message %}<p class="text-xs text-gray-600 mt-0.5">{{ n.message }}</p>{% endif %}
+                        <p class="text-xs text-gray-500 mt-1">{{ n.time_ago }}</p>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="p-6 text-center text-gray-500 text-sm">
+                        <i class="fas fa-bell-slash text-2xl mb-2 opacity-50"></i>
+                        <p>No notifications yet</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

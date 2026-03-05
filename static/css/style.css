@@ -1,0 +1,336 @@
+/* Custom Tailwind Styles */
+
+/* Smooth transitions */
+* {
+    @apply transition-colors duration-200;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Focus states */
+input:focus, textarea:focus, select:focus {
+    outline: none;
+}
+
+/* Animation for page load */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+body {
+    animation: fadeIn 0.3s ease-in;
+}
+
+/* Custom badge animations */
+/* Animated Toggle Button Design */
+input[type="checkbox"]#sidebarCheckbox,
+input[type="checkbox"]#navbarCheckbox {
+    display: none;
+}
+
+.toggleSidebar,
+.toggleNavbar {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+/* Toggle Icon Styles */
+.toggle-icon-bars {
+    font-size: 20px;
+    transition: all 0.3s ease, opacity 0.3s ease;
+}
+
+.toggle-icon-close {
+    font-size: 20px;
+    transition: all 0.3s ease, opacity 0.3s ease;
+}
+
+.toggleSidebar .toggle-icon-bars {
+    color: rgb(55, 65, 81); /* Gray-700 for sidebar */
+}
+
+.toggleNavbar .toggle-icon-bars {
+    color: rgb(255, 255, 255); /* White for navbar */
+}
+
+.toggleSidebar .toggle-icon-close {
+    color: rgb(55, 65, 81); /* Gray-700 for sidebar */
+}
+
+.toggleNavbar .toggle-icon-close {
+    color: rgb(255, 255, 255); /* White for navbar */
+}
+
+/* Sidebar Hidden State - Show close icon */
+#sidebar.hidden + .flex-1 .toggleSidebar .toggle-icon-bars {
+    display: none;
+}
+
+#sidebar.hidden + .flex-1 .toggleSidebar .toggle-icon-close {
+    display: inline-block;
+}
+
+/* Sidebar Visible State - Show bars icon */
+#sidebar:not(.hidden) + .flex-1 .toggleSidebar .toggle-icon-bars {
+    display: inline-block;
+}
+
+#sidebar:not(.hidden) + .flex-1 .toggleSidebar .toggle-icon-close {
+    display: none;
+}
+
+/* Navbar Hidden State - Show hamburger icon */
+#navbar.navbar-hidden .toggleNavbar .toggle-icon-bars {
+    display: inline-block;
+}
+
+#navbar.navbar-hidden .toggleNavbar .toggle-icon-close {
+    display: none;
+}
+
+/* Navbar Visible State - Show close icon */
+#navbar:not(.navbar-hidden) .toggleNavbar .toggle-icon-bars {
+    display: inline-block;
+}
+
+#navbar:not(.navbar-hidden) .toggleNavbar .toggle-icon-close {
+    display: none;
+}
+
+/* Icon rotation animations */
+.toggle-icon-bars {
+    animation: slideInBars 0.3s ease;
+}
+
+.toggle-icon-close {
+    animation: slideInClose 0.3s ease;
+}
+
+@keyframes slideInBars {
+    from {
+        opacity: 0;
+        transform: rotate(-90deg);
+    }
+    to {
+        opacity: 1;
+        transform: rotate(0deg);
+    }
+}
+
+@keyframes slideInClose {
+    from {
+        opacity: 0;
+        transform: rotate(90deg);
+    }
+    to {
+        opacity: 1;
+        transform: rotate(0deg);
+    }
+}
+
+/* Hover effects */
+.toggleSidebar:hover {
+    transform: scale(1.1);
+}
+
+.toggleNavbar:hover {
+    transform: scale(1.1);
+}
+
+.badge {
+    @apply inline-block px-3 py-1 rounded-full text-xs font-semibold;
+}
+
+/* Table hover effects */
+table tbody tr {
+    @apply transition-colors duration-150;
+}
+
+/* Button hover effects */
+button {
+    @apply transition-all duration-200;
+}
+
+button:hover {
+    @apply transform translate-y-px;
+}
+
+/* Card shadow effect */
+.card {
+    @apply bg-white rounded-lg shadow-md transition-shadow duration-300;
+}
+
+.card:hover {
+    @apply shadow-lg;
+}
+
+/* Country Phone Group Styles */
+.country-phone-group {
+    position: relative;
+}
+
+.country-select {
+    font-size: 14px;
+    background-color: white;
+    border: 1px solid #d1d5db;
+    padding: 10px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.country-select:hover {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.country-select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.phone-hint {
+    font-size: 13px;
+    color: #6b7280;
+    margin-top: 6px;
+    font-weight: 500;
+}
+
+.phone-error {
+    font-size: 13px;
+    color: #dc2626;
+    margin-top: 6px;
+    font-weight: 500;
+}
+
+/* Validation styling for phone inputs */
+input[type="tel"]:invalid {
+    border-color: #dc2626;
+}
+
+input[type="tel"]:valid:not(:placeholder-shown) {
+    border-color: #10b981;
+}
+
+input[type="tel"].border-red-500 {
+    border-color: #dc2626;
+    background-color: #fee2e2;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 640px) {
+    .country-select {
+        width: 70px !important;
+        padding: 8px 6px;
+        font-size: 12px;
+    }
+    
+    .country-phone-group {
+        display: block;
+    }
+    
+    .country-phone-group > div {
+        display: flex;
+        gap: 8px;
+    }
+}
+
+/* Responsive tables: horizontal scroll on small screens */
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+.table-responsive table {
+    min-width: 600px;
+}
+@media (max-width: 768px) {
+    .table-responsive table {
+        font-size: 0.875rem;
+    }
+    .table-responsive th,
+    .table-responsive td {
+        padding: 0.5rem 0.75rem;
+    }
+}
+
+/* Touch-friendly tap targets */
+@media (pointer: coarse) {
+    button:not([class*="p-"]):not([class*="px-"]):not([class*="py-"]),
+    a:not([class*="p-"]):not([class*="px-"]):not([class*="py-"]) {
+        min-height: 44px;
+        min-width: 44px;
+    }
+}
+
+/* ========== Loader (matches app blue/gray UI) ========== */
+/* Usage: <div class="loader"></div> or <div class="loader-wrapper"><div class="loader"></div></div> */
+.loader {
+    --r1: 154%;
+    --r2: 68.5%;
+    width: 60px;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background:
+        radial-gradient(var(--r1) var(--r2) at top, #0000 79.5%, #2563eb 80%),
+        radial-gradient(var(--r1) var(--r2) at bottom, #2563eb 79.5%, #0000 80%),
+        radial-gradient(var(--r1) var(--r2) at top, #0000 79.5%, #2563eb 80%),
+        #e5e7eb;
+    background-size: 50.5% 220%;
+    background-position: -100% 0%, 0% 0%, 100% 0%;
+    background-repeat: no-repeat;
+    animation: loader-spin 2s infinite linear;
+}
+
+@keyframes loader-spin {
+    33%  { background-position: 0% 33%, 100% 33%, 200% 33%; }
+    66%  { background-position: -100% 66%, 0% 66%, 100% 66%; }
+    100% { background-position: 0% 100%, 100% 100%, 200% 100%; }
+}
+
+/* Optional: center loader in a full area (e.g. loading overlay) */
+.loader-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 120px;
+    width: 100%;
+}
+.loader-wrapper.loader-fullscreen {
+    position: fixed;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.9);
+    z-index: 9999;
+}
+

@@ -1,0 +1,145 @@
+{% extends "base_portal.html" %}
+
+{% block title %}Add Staff Member - College ERP{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="bg-indigo-50 rounded-lg p-6 border-l-4 border-indigo-600">
+        <h1 class="text-3xl font-bold text-gray-800">Add Staff Member</h1>
+        <p class="text-gray-600 mt-2">Add a new staff member to the system</p>
+    </div>
+
+    <div class="max-w-4xl">
+        <div class="bg-white rounded-lg shadow-md p-8">
+            <form method="POST" class="space-y-6">
+                <!-- Name -->
+                <div>
+                    <label for="name" class="block text-sm font-semibold text-gray-700 mb-2">
+                        Full Name <span class="text-red-600">*</span>
+                    </label>
+                    <input type="text" id="name" name="name" required
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+
+                <!-- Designation -->
+                <div>
+                    <label for="designation" class="block text-sm font-semibold text-gray-700 mb-2">
+                        Designation <span class="text-red-600">*</span>
+                    </label>
+                    <input type="text" id="designation" name="designation" required
+                           placeholder="e.g., Receptionist, Accountant"
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+
+                <!-- Department -->
+                <div>
+                    <label for="department_id" class="block text-sm font-semibold text-gray-700 mb-2">
+                        Department <span class="text-red-600">*</span>
+                    </label>
+                    <select id="department_id" name="department_id" required
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="">Select Department</option>
+                        {% for dept in departments %}
+                            <option value="{{ dept.id }}">{{ dept.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Email -->
+                <div>
+                    <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">
+                        Email (optional)
+                    </label>
+                    <input type="email" id="email" name="email"
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+
+                <!-- Phone -->
+                <div class="country-phone-group">
+                    <label for="phone" class="block text-sm font-semibold text-gray-700 mb-2">
+                        Phone (optional)
+                    </label>
+                    <div class="flex gap-2">
+                        <select class="country-select w-56 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" data-initial="IN">
+                            <option value="">Select Country</option>
+                            <option value="AE">+971 United Arab Emirates</option>
+                            <option value="AU">+61 Australia</option>
+                            <option value="BD">+880 Bangladesh</option>
+                            <option value="CA">+1 Canada</option>
+                            <option value="DE">+49 Germany</option>
+                            <option value="FR">+33 France</option>
+                            <option value="GB">+44 United Kingdom</option>
+                            <option value="IN">+91 India</option>
+                            <option value="IT">+39 Italy</option>
+                            <option value="JP">+81 Japan</option>
+                            <option value="MY">+60 Malaysia</option>
+                            <option value="NZ">+64 New Zealand</option>
+                            <option value="PK">+92 Pakistan</option>
+                            <option value="SG">+65 Singapore</option>
+                            <option value="US">+1 United States</option>
+                        </select>
+                        <input type="tel" id="phone" name="phone" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Enter phone number" maxlength="10">
+                    </div>
+                    <p class="text-gray-500 text-sm mt-1 phone-hint">Select a country to format phone number</p>
+                    <p class="text-red-500 text-sm mt-1 phone-error" style="display: none;"></p>
+                </div>
+
+                <!-- Office -->
+                <div>
+                    <label for="office" class="block text-sm font-semibold text-gray-700 mb-2">
+                        Office Location (optional)
+                    </label>
+                    <input type="text" id="office" name="office"
+                           placeholder="e.g., Block A, Room 101"
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+
+                <!-- Buttons -->
+                <div class="flex gap-4">
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-8 rounded-lg transition">
+                        <i class="fas fa-plus mr-2"></i>Add Staff Member
+                    </button>
+                    <a href="{{ url_for('admin.manage_staff') }}" class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-8 rounded-lg transition">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// Initialize phone field validation
+document.addEventListener('DOMContentLoaded', function() {
+    const countrySelects = document.querySelectorAll('.country-select');
+    countrySelects.forEach(select => {
+        // Set default value
+        const initial = select.dataset.initial || 'IN';
+        select.value = initial;
+        
+        // Update phone field maxlength and hints
+        const phoneInput = select.closest('.country-phone-group')?.querySelector('input[type="tel"]');
+        if (phoneInput && window.COUNTRY_PHONE_DATA && window.COUNTRY_PHONE_DATA[initial]) {
+            const countryData = window.COUNTRY_PHONE_DATA[initial];
+            phoneInput.maxLength = countryData.maxDigits;
+            phoneInput.dataset.countryCode = initial;
+            phoneInput.dataset.maxDigits = countryData.maxDigits;
+            phoneInput.placeholder = `${countryData.maxDigits} digit number`;
+            
+            const hint = select.closest('.country-phone-group')?.querySelector('.phone-hint');
+            if (hint) {
+                hint.textContent = `${countryData.name} (${countryData.code}): Max ${countryData.maxDigits} digits`;
+            }
+        }
+        
+        // Add change event listener for country selection
+        select.addEventListener('change', function(e) {
+            if (window.handleCountryChange) {
+                window.handleCountryChange(e);
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

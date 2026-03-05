@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}College ERP System{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="bg-gray-100">
+    <!-- Student Sidebar Layout -->
+    <div class="flex h-screen bg-gray-100 sidebar-shown" id="mainContainer">
+        <!-- Hidden Checkbox for student sidebar (unique id so main.js does not override) -->
+        <input type="checkbox" id="studentSidebarCheckbox" style="display: none;">
+        
+        <!-- Sidebar -->
+        <div id="sidebar" class="w-64 bg-white shadow-lg flex flex-col transition-all duration-300">
+            <!-- Logo -->
+            <div class="p-6 border-b">
+                <div class="flex items-center">
+                    <i class="fas fa-graduation-cap text-blue-600 text-2xl mr-2"></i>
+                    <span class="font-bold text-xl text-gray-800">LUMEN ERP</span>
+                </div>
+            </div>
+
+            <!-- Menu -->
+            <nav class="mt-6">
+                {% set student = current_user.student %}
+                
+                <a href="{{ url_for('student.dashboard') }}" class="menu-item {% if request.endpoint == 'student.dashboard' %}active{% endif %}">
+                    <i class="fas fa-th-large"></i>
+                    <span>Dashboard</span>
+                </a>
+
+                <a href="{{ url_for('student.view_attendance') }}" class="menu-item {% if request.endpoint == 'student.view_attendance' %}active{% endif %}">
+                    <i class="fas fa-calendar-check"></i>
+                    <span>Attendance</span>
+                </a>
+
+                <a href="{{ url_for('main.timetable') }}" class="menu-item {% if request.endpoint == 'main.timetable' %}active{% endif %}">
+                    <i class="fas fa-clock"></i>
+                    <span>Timetable</span>
+                </a>
+
+                <a href="{{ url_for('student.fees') }}" class="menu-item {% if request.endpoint == 'student.fees' %}active{% endif %}">
+                    <i class="fas fa-money-bill-wave"></i>
+                    <span>Fees</span>
+                </a>
+
+                <a href="{{ url_for('student.view_notes') }}" class="menu-item {% if request.endpoint == 'student.view_notes' %}active{% endif %}">
+                    <i class="fas fa-book"></i>
+                    <span>Notes</span>
+                </a>
+
+                <a href="{{ url_for('student.certificates') }}" class="menu-item {% if request.endpoint == 'student.certificates' %}active{% endif %}">
+                    <i class="fas fa-certificate"></i>
+                    <span>Certificates</span>
+                </a>
+
+                <a href="{{ url_for('student.my_leaves') }}" class="menu-item {% if request.endpoint == 'student.my_leaves' %}active{% endif %}">
+                    <i class="fas fa-paper-plane"></i>
+                    <span>Leave</span>
+                </a>
+            </nav>
+
+            <!-- Logout at bottom -->
+            <div class="p-4 border-t">
+                <a href="{{ url_for('auth.logout') }}" class="flex items-center justify-center w-full px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg transition font-medium text-sm">
+                    <i class="fas fa-sign-out-alt mr-2"></i>
+                    Logout
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Content (min-w-0 so it expands when sidebar is collapsed) -->
+        <div class="flex-1 flex flex-col overflow-hidden min-w-0">
+            <!-- Top Header -->
+            <header class="bg-white shadow">
+                <div class="flex justify-between items-center px-4 sm:px-6 lg:px-8 py-3 sm:py-4 gap-2 flex-wrap">
+                    <div class="flex items-center gap-3">
+                        <label for="studentSidebarCheckbox" class="toggleSidebar p-2 -m-2 rounded-lg hover:bg-gray-100 cursor-pointer touch-manipulation" aria-label="Toggle menu">
+                            <i class="fas fa-bars toggle-icon-bars text-xl" id="sidebarBarsIcon" style="display: none;"></i>
+                            <i class="fas fa-times toggle-icon-close text-xl" id="sidebarCloseIcon"></i>
+                        </label>
+                        <div class="hidden sm:flex items-center gap-2">
+                            {% if student %}
+                                <span class="text-gray-700 font-semibold">{{ student.department_ref.name }}</span>
+                                <span class="text-gray-500 text-sm">Sem {{ student.semester }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 sm:gap-4 md:gap-6">
+                        <i class="fas fa-user-circle text-gray-400 text-xl sm:text-2xl"></i>
+                        <div class="text-center min-w-0">
+                            <p class="text-xs text-gray-500 uppercase tracking-wide hidden sm:block">{{ 'Student' if student else current_user.role|capitalize }}</p>
+                            <p class="font-medium text-gray-800 truncate max-w-[120px] sm:max-w-none">{{ current_user.username }}</p>
+                        </div>
+                        <a href="{{ url_for('auth.logout') }}" class="p-2 sm:p-0 text-gray-600 hover:text-red-600 transition" title="Logout">
+                            <i class="fas fa-sign-out-alt text-lg"></i>
+                        </a>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                    <div class="mx-6 mt-4 flash-message" role="alert">
+                        <div class="flex p-4 rounded-lg {% if category == 'success' %}bg-green-100 text-green-700{% elif category == 'danger' %}bg-red-100 text-red-700{% else %}bg-blue-100 text-blue-700{% endif %}">
+                            <i class="fas fa-{% if category == 'success' %}check-circle{% elif category == 'danger' %}exclamation-circle{% else %}info-circle{% endif %} mr-3"></i>
+                            <span>{{ message }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <!-- Content Area -->
+            <main class="flex-1 overflow-auto p-4 sm:p-6 lg:p-8 min-w-0">
+                {% block content %}{% endblock %}
+            </main>
+        </div>
+    </div>
+
+    <style>
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 16px;
+            color: #4b5563;
+            text-decoration: none;
+            border-left: 4px solid transparent;
+            border-radius: 0.5rem;
+            margin-bottom: 4px;
+            margin-left: 8px;
+            margin-right: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .menu-item i {
+            margin-right: 12px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .menu-item:hover {
+            background-color: #f3f4f6;
+            color: #3b82f6;
+            border-left-color: #3b82f6;
+        }
+
+        .menu-item.active {
+            background-color: #e0e7ff;
+            color: #3b82f6;
+            border-left-color: #3b82f6;
+            font-weight: 600;
+        }
+
+        /* Toggle Sidebar */
+        #studentSidebarCheckbox {
+            display: none;
+        }
+
+        .toggleSidebar {
+            cursor: pointer;
+            font-size: 20px;
+            color: #4b5563;
+            transition: color 0.3s ease;
+        }
+
+        .toggleSidebar:hover {
+            color: #3b82f6;
+        }
+
+        /* When sidebar is hidden: collapse it so main content expands (no whitespace) */
+        #mainContainer.sidebar-hidden #sidebar {
+            transform: translateX(-100%);
+        }
+        /* Desktop: when hidden, sidebar must take zero width so content is responsive */
+        @media (min-width: 769px) {
+            #mainContainer.sidebar-hidden #sidebar {
+                width: 0 !important;
+                min-width: 0 !important;
+                overflow: hidden;
+                padding: 0;
+                margin: 0;
+                border: none;
+                box-shadow: none;
+            }
+        }
+
+        #mainContainer.sidebar-hidden #sidebarBarsIcon {
+            display: inline-block !important;
+        }
+
+        #mainContainer.sidebar-hidden #sidebarCloseIcon {
+            display: none !important;
+        }
+
+        /* When sidebar is shown: show close icon (click to close) */
+        #mainContainer.sidebar-shown #sidebarBarsIcon {
+            display: none !important;
+        }
+
+        #mainContainer.sidebar-shown #sidebarCloseIcon {
+            display: inline-block !important;
+        }
+
+        /* Base state so global style.css does not override icons */
+        #mainContainer #sidebarBarsIcon { display: none !important; }
+        #mainContainer #sidebarCloseIcon { display: inline-block !important; }
+
+        @media (max-width: 768px) {
+            #sidebar {
+                position: fixed;
+                left: 0;
+                top: 0;
+                height: 100%;
+                z-index: 40;
+                transform: translateX(-100%);
+                max-width: 85vw;
+                width: 16rem;
+            }
+
+            #mainContainer.sidebar-shown #sidebar {
+                transform: translateX(0);
+            }
+
+            /* Start with sidebar closed on mobile */
+            #mainContainer.sidebar-hidden #sidebar {
+                transform: translateX(-100%);
+            }
+        }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var sidebarCheckbox = document.getElementById('studentSidebarCheckbox');
+            var mainContainer = document.getElementById('mainContainer');
+            var sidebarBarsIcon = document.getElementById('sidebarBarsIcon');
+            var sidebarCloseIcon = document.getElementById('sidebarCloseIcon');
+            var sidebarLabel = document.querySelector('label[for="studentSidebarCheckbox"]');
+            if (!mainContainer) return;
+
+            function setOpen(open) {
+                if (open) {
+                    mainContainer.classList.remove('sidebar-hidden');
+                    mainContainer.classList.add('sidebar-shown');
+                    if (sidebarCheckbox) sidebarCheckbox.checked = false;
+                } else {
+                    mainContainer.classList.add('sidebar-hidden');
+                    mainContainer.classList.remove('sidebar-shown');
+                    if (sidebarCheckbox) sidebarCheckbox.checked = true;
+                }
+            }
+
+            // Start with sidebar hidden on all devices; user must click to open
+            setOpen(false);
+
+            if (sidebarLabel) {
+                sidebarLabel.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    var isHidden = mainContainer.classList.contains('sidebar-hidden');
+                    setOpen(isHidden);
+                });
+            }
+            if (sidebarCheckbox) {
+                sidebarCheckbox.addEventListener('change', function() {
+                    setOpen(!this.checked);
+                });
+            }
+            var menuItems = document.querySelectorAll('#sidebar .menu-item');
+            if (menuItems.length) {
+                menuItems.forEach(function(item) {
+                    item.addEventListener('click', function() {
+                        if (isMobile()) setOpen(false);
+                    });
+        });
+    }
+});
+    </script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

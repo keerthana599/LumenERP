@@ -1,0 +1,293 @@
+{% extends "base_portal.html" %}
+
+{% block title %}Create Timetable - College ERP{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="border-l-4 border-blue-500 pl-6">
+        <h1 class="text-3xl font-bold text-gray-900">Create Timetable Entry</h1>
+        <p class="text-gray-600 mt-1">Add class schedules and assign faculty members</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Form Section -->
+        <div class="lg:col-span-2">
+            <form method="POST" class="bg-white rounded-lg shadow p-8 space-y-6">
+                <!-- Class Selection -->
+                <div class="bg-blue-50 rounded-lg p-6 border-l-4 border-blue-500">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                        <i class="fas fa-graduation-cap text-blue-600 mr-2"></i>
+                        Select Class
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <!-- 1. Department (first) -->
+                        <div>
+                            <label class="block text-sm font-bold text-gray-800 mb-2">
+                                <i class="fas fa-building text-blue-600 mr-2"></i>Department
+                                <span class="text-red-500">*</span>
+                            </label>
+                            <select name="department" required id="department" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none transition" value="{{ pre_dept }}">
+                                <option value="">Select Department</option>
+                                {% for dept in departments %}
+                                <option value="{{ dept.code }}" {% if pre_dept == dept.code %}selected{% endif %}>{{ dept.name }} ({{ dept.code }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- 2. Course (second – filtered by department) -->
+                        <div>
+                            <label class="block text-sm font-bold text-gray-800 mb-2">
+                                <i class="fas fa-graduation-cap text-blue-600 mr-2"></i>Course
+                                <span class="text-red-500">*</span>
+                            </label>
+                            <select name="course_id" required id="course_id" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none transition">
+                                <option value="">Select department first</option>
+                            </select>
+                        </div>
+
+                        <!-- 3. Semester (third – each semester is a class) -->
+                        <div>
+                            <label class="block text-sm font-bold text-gray-800 mb-2">
+                                <i class="fas fa-book text-blue-600 mr-2"></i>Semester (Class)
+                                <span class="text-red-500">*</span>
+                            </label>
+                            <select name="semester" required id="semester" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none transition">
+                                <option value="">Select semester</option>
+                                {% for sem in semesters %}
+                                <option value="{{ sem }}">Semester {{ sem }}</option>
+                                {% endfor %}
+                            </select>
+                            <p class="text-xs text-gray-500 mt-1">Each semester is a class</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Schedule Details -->
+                <div class="bg-purple-50 rounded-lg p-6 border-l-4 border-purple-500">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                        <i class="fas fa-calendar-alt text-purple-600 mr-2"></i>
+                        Schedule Details
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Day of Week -->
+                        <div>
+                            <label class="block text-sm font-bold text-gray-800 mb-2">
+                                <i class="fas fa-calendar-day text-purple-600 mr-2"></i>Day of Week
+                                <span class="text-red-500">*</span>
+                            </label>
+                            <select name="day_of_week" required class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none transition">
+                                <option value="">Select Day</option>
+                                {% for day in days %}
+                                <option value="{{ day }}">{{ day }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Subject (auto-filled from selected course; editable) -->
+                        <div>
+                            <label class="block text-sm font-bold text-gray-800 mb-2">
+                                <i class="fas fa-book-open text-purple-600 mr-2"></i>Subject/Course
+                                <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" name="subject" id="subject" required placeholder="Select a course above or type subject" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none transition">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                        <!-- Start Time -->
+                        <div>
+                            <label class="block text-sm font-bold text-gray-800 mb-2">
+                                <i class="fas fa-clock text-purple-600 mr-2"></i>Start Time
+                                <span class="text-red-500">*</span>
+                            </label>
+                            <input type="time" name="start_time" required class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none transition">
+                        </div>
+
+                        <!-- End Time -->
+                        <div>
+                            <label class="block text-sm font-bold text-gray-800 mb-2">
+                                <i class="fas fa-clock text-purple-600 mr-2"></i>End Time
+                                <span class="text-red-500">*</span>
+                            </label>
+                            <input type="time" name="end_time" required class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none transition">
+                        </div>
+
+                        <!-- Room Number -->
+                        <div>
+                            <label class="block text-sm font-bold text-gray-800 mb-2">
+                                <i class="fas fa-door-open text-purple-600 mr-2"></i>Room Number
+                            </label>
+                            <input type="text" name="room_no" placeholder="e.g., A101" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none transition">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Faculty Assignment -->
+                <div class="bg-green-50 rounded-lg p-6 border-l-4 border-green-500">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                        <i class="fas fa-user-tie text-green-600 mr-2"></i>
+                        Assign Faculty Member
+                    </h3>
+                    
+                    <div>
+                        <label class="block text-sm font-bold text-gray-800 mb-3">
+                            <i class="fas fa-search text-green-600 mr-2"></i>Select Faculty
+                        </label>
+                        <select name="faculty_id" id="faculty_id" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-green-500 focus:outline-none transition">
+                            <option value="">-- Not Assigned (Can assign later) --</option>
+                            {% for faculty in faculties %}
+                            <option value="{{ faculty.id }}" data-dept="{{ faculty.department_ref.code }}">{{ faculty.user.username }} - {{ faculty.designation }} ({{ faculty.department_ref.code }})</option>
+                            {% endfor %}
+                        </select>
+                        <p class="text-xs text-gray-600 mt-2">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            You can leave this empty and assign faculty later
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex justify-between pt-6 border-t">
+                    <a href="{{ url_for('admin.manage_timetable') }}" class="px-6 py-2 bg-gray-300 text-gray-800 font-medium rounded-lg hover:bg-gray-400 transition flex items-center">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Back
+                    </a>
+                    <button type="submit" class="px-8 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition flex items-center">
+                        <i class="fas fa-plus mr-2"></i>
+                        Create Timetable Entry
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Information Panel -->
+        <div class="lg:col-span-1 space-y-4">
+            <!-- Quick Tips -->
+            <div class="bg-blue-50 rounded-lg p-6 border-l-4 border-blue-500">
+                <h4 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                    <i class="fas fa-lightbulb text-yellow-500 mr-2"></i>
+                    Quick Tips
+                </h4>
+                <ul class="space-y-3 text-sm">
+                    <li class="flex items-start">
+                        <i class="fas fa-check text-green-600 mt-1 mr-2 flex-shrink-0"></i>
+                        <span class="text-gray-700">Fill all required fields marked with <span class="text-red-500 font-bold">*</span></span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check text-green-600 mt-1 mr-2 flex-shrink-0"></i>
+                        <span class="text-gray-700">Start time must be before end time</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check text-green-600 mt-1 mr-2 flex-shrink-0"></i>
+                        <span class="text-gray-700">Faculty assignment is optional initially</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check text-green-600 mt-1 mr-2 flex-shrink-0"></i>
+                        <span class="text-gray-700">You can edit entries later if needed</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Faculty Count -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h4 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                    <i class="fas fa-users text-blue-600 mr-2"></i>
+                    Available Faculty
+                </h4>
+                <div class="space-y-2">
+                    <div class="text-3xl font-bold text-blue-600">{{ faculties|length }}</div>
+                    <p class="text-sm text-gray-600">Faculty members available for assignment</p>
+                </div>
+            </div>
+
+            <!-- Instructions -->
+            <div class="bg-purple-50 rounded-lg p-6 border-l-4 border-purple-500">
+                <h4 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                    <i class="fas fa-book text-purple-600 mr-2"></i>
+                    Instructions
+                </h4>
+                <ol class="space-y-2 text-sm text-gray-700">
+                    <li><span class="font-semibold">1.</span> Select <strong>department</strong> first</li>
+                    <li><span class="font-semibold">2.</span> Select a <strong>course</strong> (available courses under that dept)</li>
+                    <li><span class="font-semibold">3.</span> Select <strong>semester</strong> (each semester is a class)</li>
+                    <li><span class="font-semibold">4.</span> Choose day, times, room (subject auto-fills from course)</li>
+                    <li><span class="font-semibold">5.</span> Assign faculty (optional) and submit</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Flow: 1) Dept → 2) Available courses (under dept) → 3) Semester (each semester is a class)
+    const coursesData = [
+        {% for course in courses %}
+        { id: {{ course.id }}, name: {{ course.name | tojson }}, department: {{ course.department_ref.code | tojson }}, semester: {{ course.semester }} },
+        {% endfor %}
+    ];
+
+    const deptSelect = document.getElementById('department');
+    const courseSelect = document.getElementById('course_id');
+    const semSelect = document.getElementById('semester');
+    const subjectInput = document.getElementById('subject');
+    const facultySelect = document.getElementById('faculty_id');
+
+    function clearCourseAndSubject() {
+        courseSelect.value = '';
+        while (courseSelect.options.length > 1) courseSelect.remove(1);
+        courseSelect.options[0].text = 'Select department first';
+        courseSelect.options[0].disabled = false;
+        if (subjectInput) subjectInput.value = '';
+    }
+
+    function updateCourseOptions() {
+        const dept = deptSelect.value;
+        clearCourseAndSubject();
+        if (!dept) return;
+
+        const byDept = coursesData.filter(c => c.department === dept);
+        if (byDept.length === 0) {
+            courseSelect.options[0].text = 'No courses in this department';
+            courseSelect.options[0].disabled = true;
+            return;
+        }
+        courseSelect.options[0].text = 'Select Course';
+        byDept.forEach(course => {
+            const opt = document.createElement('option');
+            opt.value = course.id;
+            opt.textContent = course.name;
+            opt.dataset.name = course.name;
+            courseSelect.appendChild(opt);
+        });
+    }
+
+    function onCourseChange() {
+        const opt = courseSelect.options[courseSelect.selectedIndex];
+        if (subjectInput && opt && opt.value && opt.dataset.name) subjectInput.value = opt.dataset.name;
+        else if (subjectInput && !courseSelect.value) subjectInput.value = '';
+    }
+
+    function updateFacultyOptions() {
+        const dept = deptSelect.value;
+        facultySelect.querySelectorAll('option[data-dept]').forEach(opt => {
+            opt.style.display = dept && opt.dataset.dept !== dept ? 'none' : '';
+            opt.disabled = dept ? opt.dataset.dept !== dept : false;
+        });
+        if (!facultySelect.value && dept) {
+            const first = facultySelect.querySelector('option[data-dept="' + dept + '"]');
+            if (first) facultySelect.value = first.value;
+        }
+    }
+
+    deptSelect.addEventListener('change', function() { updateCourseOptions(); updateFacultyOptions(); });
+    courseSelect.addEventListener('change', onCourseChange);
+
+    window.addEventListener('DOMContentLoaded', function() {
+        updateCourseOptions();
+        updateFacultyOptions();
+    });
+</script>
+{% endblock %}

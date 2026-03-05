@@ -1,0 +1,166 @@
+{% extends "base_portal.html" %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 py-8">
+    <div class="max-w-4xl mx-auto px-4">
+        <!-- Header -->
+        <div class="mb-8">
+            <a href="{{ url_for('admin.manage_faculty') }}" class="text-blue-600 hover:text-blue-800 font-semibold mb-2 inline-flex items-center">
+                <i class="fas fa-arrow-left mr-2"></i>Back to Faculty
+            </a>
+            <h1 class="text-4xl font-bold text-gray-800 flex items-center mt-2">
+                <i class="fas fa-chalkboard-user text-blue-600 mr-3"></i>Add Faculty Member
+            </h1>
+            <p class="text-gray-600 mt-2">Register a new faculty member in the system</p>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-lg p-8 border border-gray-100">
+            <form method="POST" class="space-y-8">
+                
+                <!-- Account Information -->
+                <div>
+                    <h2 class="text-xl font-bold text-gray-800 mb-4 pb-2 border-b-2 border-blue-500 flex items-center">
+                        <i class="fas fa-user text-blue-600 mr-2"></i>Account Information
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-gray-700 font-semibold mb-2">Username <span class="text-red-500">*</span></label>
+                            <input type="text" name="username" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition" placeholder="Enter username">
+                            <p class="text-gray-500 text-sm mt-1">Unique login username</p>
+                        </div>
+
+                        <div>
+                            <label class="block text-gray-700 font-semibold mb-2">Email <span class="text-red-500">*</span></label>
+                            <input type="email" name="email" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition" placeholder="faculty@university.edu">
+                            <p class="text-gray-500 text-sm mt-1">Official email address</p>
+                        </div>
+
+                        <div class="md:col-span-2">
+                            <label class="block text-gray-700 font-semibold mb-2">Password <span class="text-red-500">*</span></label>
+                            <input type="password" name="password" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition" placeholder="Enter password">
+                            <p class="text-gray-500 text-sm mt-1">Secure password for login</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Professional Details -->
+                <div>
+                    <h2 class="text-xl font-bold text-gray-800 mb-4 pb-2 border-b-2 border-indigo-500 flex items-center">
+                        <i class="fas fa-briefcase text-indigo-600 mr-2"></i>Professional Details
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-gray-700 font-semibold mb-2">Department <span class="text-red-500">*</span></label>
+                            <select name="department_id" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition">
+                                <option value="">Select Department</option>
+                                {% for dept in departments %}
+                                    <option value="{{ dept.id }}">{{ dept.name }}</option>
+                                {% endfor %}
+                            </select>
+                            <p class="text-gray-500 text-sm mt-1">Department affiliation</p>
+                        </div>
+
+                        <div>
+                            <label class="block text-gray-700 font-semibold mb-2">Designation <span class="text-red-500">*</span></label>
+                            <input type="text" name="designation" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition" placeholder="e.g., Assistant Professor">
+                            <p class="text-gray-500 text-sm mt-1">Job title/position</p>
+                        </div>
+
+                        <div>
+                            <label class="block text-gray-700 font-semibold mb-2">Qualification</label>
+                            <input type="text" name="qualification" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition" placeholder="e.g., PhD, Masters">
+                            <p class="text-gray-500 text-sm mt-1">Highest qualification</p>
+                        </div>
+
+                        <div>
+                            <label class="block text-gray-700 font-semibold mb-2">Specialization</label>
+                            <input type="text" name="specialization" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition" placeholder="Area of expertise">
+                            <p class="text-gray-500 text-sm mt-1">Primary area of specialization</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact Information -->
+                <div>
+                    <h2 class="text-xl font-bold text-gray-800 mb-4 pb-2 border-b-2 border-green-500 flex items-center">
+                        <i class="fas fa-phone text-green-600 mr-2"></i>Contact Information
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="country-phone-group">
+                            <label class="block text-gray-700 font-semibold mb-2">Phone</label>
+                            <div class="flex gap-2">
+                                <select class="country-select w-56 px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition" data-initial="IN">
+                                    <option value="">Select Country</option>
+                                            <option value="AE">+971 United Arab Emirates</option>
+                                            <option value="AU">+61 Australia</option>
+                                            <option value="BD">+880 Bangladesh</option>
+                                            <option value="CA">+1 Canada</option>
+                                            <option value="DE">+49 Germany</option>
+                                            <option value="FR">+33 France</option>
+                                            <option value="GB">+44 United Kingdom</option>
+                                            <option value="IN">+91 India</option>
+                                            <option value="IT">+39 Italy</option>
+                                            <option value="JP">+81 Japan</option>
+                                            <option value="MY">+60 Malaysia</option>
+                                            <option value="NZ">+64 New Zealand</option>
+                                            <option value="PK">+92 Pakistan</option>
+                                            <option value="SG">+65 Singapore</option>
+                                            <option value="US">+1 United States</option>
+                        </div>
+
+                        <div>
+                            <label class="block text-gray-700 font-semibold mb-2">Office Location</label>
+                            <input type="text" name="office" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition" placeholder="Building A, Room 101">
+                            <p class="text-gray-500 text-sm mt-1">Office location in campus</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Buttons -->
+                <div class="flex gap-4 pt-6 border-t border-gray-200">
+                    <button type="submit" class="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-3 px-6 rounded-lg transition shadow-md hover:shadow-lg">
+                        <i class="fas fa-save mr-2"></i>Add Faculty Member
+                    </button>
+                    <a href="{{ url_for('admin.manage_faculty') }}" class="flex-1 text-center bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-6 rounded-lg transition">
+                        <i class="fas fa-times mr-2"></i>Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// Initialize phone field validation
+document.addEventListener('DOMContentLoaded', function() {
+    const countrySelects = document.querySelectorAll('.country-select');
+    countrySelects.forEach(select => {
+        // Set default value
+        const initial = select.dataset.initial || 'IN';
+        select.value = initial;
+        
+        // Update phone field maxlength and hints
+        const phoneInput = select.closest('.country-phone-group')?.querySelector('input[type="tel"]');
+        if (phoneInput && window.COUNTRY_PHONE_DATA && window.COUNTRY_PHONE_DATA[initial]) {
+            const countryData = window.COUNTRY_PHONE_DATA[initial];
+            phoneInput.maxLength = countryData.maxDigits;
+            phoneInput.dataset.countryCode = initial;
+            phoneInput.dataset.maxDigits = countryData.maxDigits;
+            phoneInput.placeholder = `${countryData.maxDigits} digit number`;
+            
+            const hint = select.closest('.country-phone-group')?.querySelector('.phone-hint');
+            if (hint) {
+                hint.textContent = `${countryData.name} (${countryData.code}): Max ${countryData.maxDigits} digits`;
+            }
+        }
+        
+        // Add change event listener for country selection
+        select.addEventListener('change', function(e) {
+            if (window.handleCountryChange) {
+                window.handleCountryChange(e);
+            }
+        });
+    });
+});
+</script>
+{% endblock %}
