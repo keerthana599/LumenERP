@@ -37,7 +37,7 @@
             </div>
 
             <!-- Menu -->
-            <nav class="mt-4 flex-1 px-3">
+            <nav class="mt-4 flex-1 px-3 overflow-y-auto pb-4">
                 <p class="text-xs font-semibold text-gray-600 uppercase tracking-wider px-3 mb-4">Menu</p>
                 
                 {% if current_user.role == 'faculty' %}
@@ -105,6 +105,11 @@
                     <a href="{{ url_for('admin.upload_certificate') }}" class="menu-item {% if request.endpoint == 'admin.upload_certificate' %}active{% endif %}">
                         <i class="fas fa-certificate"></i>
                         <span>Certificates</span>
+                    </a>
+
+                    <a href="{{ url_for('admin.manage_fees') }}" class="menu-item {% if request.endpoint == 'admin.manage_fees' %}active{% endif %}">
+                        <i class="fas fa-receipt"></i>
+                        <span>Manage Fees</span>
                     </a>
 
                     <a href="{{ url_for('admin.manage_leaves') }}" class="menu-item {% if request.endpoint == 'admin.manage_leaves' %}active{% endif %}">

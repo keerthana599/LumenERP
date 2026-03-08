@@ -1,0 +1,198 @@
+{% extends "base_portal.html" %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 py-4 sm:py-8">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="flex items-center gap-3 mb-2">
+                <a href="{{ url_for('admin.manage_fees') }}" class="text-blue-600 hover:text-blue-700 transition">
+                    <i class="fas fa-arrow-left mr-2"></i>Back to Fees
+                </a>
+            </div>
+            <h1 class="text-3xl lg:text-4xl font-bold text-gray-800 flex items-center gap-2">
+                <i class="fas fa-plus-circle text-blue-600"></i>
+                <span>Assign Fee to Student</span>
+            </h1>
+            <p class="text-gray-600 mt-2">Create and assign a new fee to a student. The student will be notified.</p>
+        </div>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="mb-6 p-4 rounded-lg border-l-4 {% if category == 'danger' %}bg-red-50 border-red-500 text-red-700{% else %}bg-green-50 border-green-500 text-green-700{% endif %}">
+                        <div class="flex items-center">
+                            <i class="fas {% if category == 'danger' %}fa-exclamation-circle{% else %}fa-check-circle{% endif %} mr-3"></i>
+                            <span>{{ message }}</span>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Form Card -->
+        <div class="bg-white rounded-lg shadow-xl overflow-hidden">
+            <div class="bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-4">
+                <h2 class="text-xl font-bold text-white">Fee Assignment Form</h2>
+            </div>
+
+            <form method="POST" class="p-6 space-y-6">
+                <!-- Student Selection -->
+                <div class="space-y-3">
+                    <label for="student_id" class="block text-gray-700 font-semibold">
+                        <i class="fas fa-user-graduate text-blue-600 mr-2"></i>Select Student
+                        <span class="text-red-600">*</span>
+                    </label>
+                    <div class="relative">
+                        <input type="text" 
+                               id="student_search" 
+                               placeholder="Search by roll number or name..." 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 transition"
+                               autocomplete="off">
+                        <select id="student_id" 
+                                name="student_id" 
+                                required 
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 transition mt-2">
+                            <option value="">-- Select a Student --</option>
+                            {% for student in students %}
+                                <option value="{{ student.id }}" data-roll="{{ student.roll_no }}" data-name="{{ student.user.username }}">
+                                    {{ student.roll_no }} - {{ student.user.username }} (Sem {{ student.semester }}, {{ student.department_ref.code }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <p class="text-xs text-gray-500">
+                        <i class="fas fa-info-circle mr-1"></i>Search and select the student to assign the fee
+                    </p>
+                </div>
+
+                <!-- Fee Type -->
+                <div class="space-y-3">
+                    <label for="fee_type" class="block text-gray-700 font-semibold">
+                        <i class="fas fa-tag text-blue-600 mr-2"></i>Fee Type
+                        <span class="text-red-600">*</span>
+                    </label>
+                    <input type="text" 
+                           id="fee_type" 
+                           name="fee_type" 
+                           placeholder="e.g., Tuition, Lab Fee, Library Fine, Exam Fee, etc." 
+                           required 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 transition"
+                           list="fee_types">
+                    <datalist id="fee_types">
+                        <option>Tuition</option>
+                        <option>Lab Fee</option>
+                        <option>Library Fine</option>
+                        <option>Exam Fee</option>
+                        <option>Hostel Fee</option>
+                        <option>Activity Fee</option>
+                        <option>Development Fee</option>
+                    </datalist>
+                    <p class="text-xs text-gray-500">
+                        <i class="fas fa-info-circle mr-1"></i>Type the fee category (or choose from suggestions)
+                    </p>
+                </div>
+
+                <!-- Two Column Layout for Semester and Amount -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Semester -->
+                    <div class="space-y-3">
+                        <label for="semester" class="block text-gray-700 font-semibold">
+                            <i class="fas fa-calendar-alt text-blue-600 mr-2"></i>Semester
+                            <span class="text-red-600">*</span>
+                        </label>
+                        <select id="semester" 
+                                name="semester" 
+                                required 
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 transition">
+                            <option value="">-- Select Semester --</option>
+                            {% for sem in semesters %}
+                                <option value="{{ sem }}">Semester {{ sem }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Amount -->
+                    <div class="space-y-3">
+                        <label for="amount" class="block text-gray-700 font-semibold">
+                            <i class="fas fa-rupee-sign text-blue-600 mr-2"></i>Amount (₹)
+                            <span class="text-red-600">*</span>
+                        </label>
+                        <input type="number" 
+                               id="amount" 
+                               name="amount" 
+                               placeholder="Enter amount" 
+                               required 
+                               step="0.01" 
+                               min="0" 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 transition">
+                    </div>
+                </div>
+
+                <!-- Deadline -->
+                <div class="space-y-3">
+                    <label for="due_date" class="block text-gray-700 font-semibold">
+                        <i class="fas fa-calendar text-blue-600 mr-2"></i>Payment Deadline
+                        <span class="text-red-600">*</span>
+                    </label>
+                    <input type="date" 
+                           id="due_date" 
+                           name="due_date" 
+                           required 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 transition">
+                    <p class="text-xs text-gray-500">
+                        <i class="fas fa-info-circle mr-1"></i>Select the deadline for payment
+                    </p>
+                </div>
+
+                <!-- Notes -->
+                <div class="space-y-3">
+                    <label for="notes" class="block text-gray-700 font-semibold">
+                        <i class="fas fa-notes-medical text-blue-600 mr-2"></i>Additional Notes (Optional)
+                    </label>
+                    <textarea id="notes" 
+                              name="notes" 
+                              rows="3" 
+                              placeholder="Add any additional information or special instructions..."
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 transition resize-none"></textarea>
+                </div>
+
+                <!-- Information Box -->
+                <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
+                    <p class="text-sm text-blue-800">
+                        <i class="fas fa-lightbulb mr-2"></i>
+                        <strong>Note:</strong> When you assign a fee, the student will receive a notification in their dashboard and the fee will appear in their fees section.
+                    </p>
+                </div>
+
+                <!-- Buttons -->
+                <div class="flex gap-4 pt-4">
+                    <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition shadow-lg hover:shadow-xl">
+                        <i class="fas fa-check-circle mr-2"></i>Assign Fee
+                    </button>
+                    <a href="{{ url_for('admin.manage_fees') }}" class="flex-1 text-center bg-gray-400 hover:bg-gray-500 text-white font-bold py-3 px-6 rounded-lg transition shadow-lg hover:shadow-xl">
+                        <i class="fas fa-times mr-2"></i>Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// Student search functionality
+document.getElementById('student_search').addEventListener('input', function(e) {
+    const searchTerm = e.target.value.toLowerCase();
+    const select = document.getElementById('student_id');
+    const options = select.querySelectorAll('option:not(:first-child)');
+    
+    options.forEach(option => {
+        const roll = option.dataset.roll.toLowerCase();
+        const name = option.dataset.name.toLowerCase();
+        const matches = roll.includes(searchTerm) || name.includes(searchTerm);
+        option.style.display = searchTerm === '' || matches ? '' : 'none';
+    });
+});
+</script>
+{% endblock %}

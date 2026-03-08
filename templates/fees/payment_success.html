@@ -1,0 +1,191 @@
+{% extends "base_student_portal.html" %}
+
+{% block title %}Payment Successful - LumenERP{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6">
+    <div class="max-w-3xl mx-auto">
+        <!-- Success Animation -->
+        <div class="text-center mb-6">
+            <div class="inline-block bg-green-100 rounded-full p-6 mb-4">
+                <i class="fas fa-check-circle text-6xl text-green-600"></i>
+            </div>
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">Payment Successful!</h1>
+            <p class="text-gray-600">Your fee payment has been processed successfully</p>
+        </div>
+
+        <!-- Transaction Details Card -->
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden mb-6">
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-4">
+                <h2 class="text-xl font-bold flex items-center">
+                    <i class="fas fa-receipt mr-2"></i>Payment Receipt
+                </h2>
+                <p class="text-green-100 text-sm mt-1">Transaction ID: {{ transaction_id }}</p>
+            </div>
+
+            <!-- Body -->
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div class="space-y-3">
+                        <div>
+                            <label class="text-sm text-gray-600 font-semibold">Student Name</label>
+                            <p class="text-gray-800 font-semibold">{{ current_user.name }}</p>
+                        </div>
+                        <div>
+                            <label class="text-sm text-gray-600 font-semibold">Student ID</label>
+                            <p class="text-gray-800 font-semibold">{{ student.roll_number }}</p>
+                        </div>
+                        <div>
+                            <label class="text-sm text-gray-600 font-semibold">Fee Type</label>
+                            <p class="text-gray-800 font-semibold">{{ fee.fee_type }}</p>
+                        </div>
+                        <div>
+                            <label class="text-sm text-gray-600 font-semibold">Semester</label>
+                            <p class="text-gray-800 font-semibold">{{ fee.semester }}</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div>
+                            <label class="text-sm text-gray-600 font-semibold">Payment Date</label>
+                            <p class="text-gray-800 font-semibold">{{ fee.paid_date.strftime('%d %B %Y, %I:%M %p') }}</p>
+                        </div>
+                        <div>
+                            <label class="text-sm text-gray-600 font-semibold">Payment Method</label>
+                            <p class="text-gray-800 font-semibold">
+                                {% if 'Credit/Debit Card' in fee.notes %}
+                                    <i class="fas fa-credit-card mr-1 text-blue-600"></i>Credit/Debit Card
+                                {% elif 'UPI' in fee.notes %}
+                                    <i class="fas fa-mobile-alt mr-1 text-purple-600"></i>UPI
+                                {% elif 'Net Banking' in fee.notes %}
+                                    <i class="fas fa-university mr-1 text-green-600"></i>Net Banking
+                                {% elif 'Wallet' in fee.notes %}
+                                    <i class="fas fa-wallet mr-1 text-orange-600"></i>Digital Wallet
+                                {% else %}
+                                    Online Payment
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div>
+                            <label class="text-sm text-gray-600 font-semibold">Status</label>
+                            <p class="text-gray-800 font-semibold">
+                                <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs">
+                                    <i class="fas fa-check-circle mr-1"></i>Paid
+                                </span>
+                            </p>
+                        </div>
+                        <div>
+                            <label class="text-sm text-gray-600 font-semibold">Transaction ID</label>
+                            <p class="text-gray-800 font-mono text-sm font-semibold">{{ transaction_id }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Amount Section -->
+                <div class="border-t pt-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-gray-600">Fee Amount:</span>
+                        <span class="text-gray-800 font-semibold">₹{{ "%.0f"|format(fee.amount) }}</span>
+                    </div>
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-gray-600">Processing Fee:</span>
+                        <span class="text-gray-800 font-semibold">₹0</span>
+                    </div>
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-gray-600">GST:</span>
+                        <span class="text-gray-800 font-semibold">₹0</span>
+                    </div>
+                    <div class="border-t mt-2 pt-2 flex justify-between items-center">
+                        <span class="text-lg font-bold text-gray-800">Total Paid:</span>
+                        <span class="text-2xl font-bold text-green-600">₹{{ "%.0f"|format(fee.amount) }}</span>
+                    </div>
+                </div>
+
+                <!-- Important Note -->
+                <div class="mt-6 bg-blue-50 border-l-4 border-blue-600 p-4 rounded">
+                    <div class="flex">
+                        <i class="fas fa-info-circle text-blue-600 mt-1 mr-2"></i>
+                        <div>
+                            <p class="text-sm text-gray-700">
+                                <strong>Important:</strong> Please save this transaction ID for your records. 
+                                A confirmation email has been sent to your registered email address. 
+                                You can download the receipt from your fees dashboard.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-wrap gap-4 justify-center">
+            <button onclick="window.print()" 
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition shadow hover:shadow-lg flex items-center">
+                <i class="fas fa-print mr-2"></i>Print Receipt
+            </button>
+            <a href="{{ url_for('student.fees') }}"
+               class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold transition shadow hover:shadow-lg inline-flex items-center">
+                <i class="fas fa-file-invoice-dollar mr-2"></i>View All Fees
+            </a>
+            <a href="{{ url_for('student.dashboard') }}"
+               class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-semibold transition shadow hover:shadow-lg inline-flex items-center">
+                <i class="fas fa-home mr-2"></i>Go to Dashboard
+            </a>
+        </div>
+
+        <!-- Success Message -->
+        <div class="mt-6 text-center">
+            <p class="text-gray-600 text-sm">
+                <i class="fas fa-check mr-1 text-green-600"></i>
+                Thank you for your payment. Your transaction has been completed successfully.
+            </p>
+        </div>
+    </div>
+</div>
+
+<style>
+    @media print {
+        .no-print {
+            display: none !important;
+        }
+        body {
+            background: white;
+        }
+        .shadow-lg {
+            box-shadow: none !important;
+        }
+    }
+</style>
+
+<script>
+    // Auto-scroll to top on page load
+    window.onload = function() {
+        window.scrollTo(0, 0);
+        
+        // Show confetti animation (optional)
+        confetti();
+    };
+
+    // Simple confetti effect (optional)
+    function confetti() {
+        const duration = 3 * 1000;
+        const animationEnd = Date.now() + duration;
+        const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+        function randomInRange(min, max) {
+            return Math.random() * (max - min) + min;
+        }
+
+        const interval = setInterval(function() {
+            const timeLeft = animationEnd - Date.now();
+
+            if (timeLeft <= 0) {
+                return clearInterval(interval);
+            }
+
+            const particleCount = 50 * (timeLeft / duration);
+        }, 250);
+    }
+</script>
+{% endblock %}

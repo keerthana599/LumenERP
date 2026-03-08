@@ -1,0 +1,181 @@
+{% extends "base_portal.html" %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 py-4 sm:py-8">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="flex items-center gap-3 mb-2">
+                <a href="{{ url_for('admin.manage_fees') }}" class="text-blue-600 hover:text-blue-700 transition">
+                    <i class="fas fa-arrow-left mr-2"></i>Back to Fees
+                </a>
+            </div>
+            <h1 class="text-3xl lg:text-4xl font-bold text-gray-800 flex items-center gap-2">
+                <i class="fas fa-edit text-blue-600"></i>
+                <span>Edit Fee</span>
+            </h1>
+            <p class="text-gray-600 mt-2">Update fee details for {{ fee.student.user.username }} ({{ fee.student.roll_no }})</p>
+        </div>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="mb-6 p-4 rounded-lg border-l-4 {% if category == 'danger' %}bg-red-50 border-red-500 text-red-700{% else %}bg-green-50 border-green-500 text-green-700{% endif %}">
+                        <div class="flex items-center">
+                            <i class="fas {% if category == 'danger' %}fa-exclamation-circle{% else %}fa-check-circle{% endif %} mr-3"></i>
+                            <span>{{ message }}</span>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Form Card -->
+        <div class="bg-white rounded-lg shadow-xl overflow-hidden">
+            <div class="bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-4">
+                <h2 class="text-xl font-bold text-white">Edit Fee Details</h2>
+            </div>
+
+            <form method="POST" class="p-6 space-y-6">
+                <!-- Student Info (Read-only) -->
+                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <p class="text-xs text-gray-600 font-semibold uppercase">Roll Number</p>
+                            <p class="text-lg font-bold text-gray-800">{{ fee.student.roll_no }}</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-600 font-semibold uppercase">Student Name</p>
+                            <p class="text-lg font-bold text-gray-800">{{ fee.student.user.username }}</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-600 font-semibold uppercase">Department</p>
+                            <p class="text-lg font-bold text-gray-800">{{ fee.student.department_ref.code }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fee Type -->
+                <div class="space-y-3">
+                    <label for="fee_type" class="block text-gray-700 font-semibold">
+                        <i class="fas fa-tag text-blue-600 mr-2"></i>Fee Type
+                        <span class="text-red-600">*</span>
+                    </label>
+                    <input type="text" 
+                           id="fee_type" 
+                           name="fee_type" 
+                           value="{{ fee.fee_type }}" 
+                           placeholder="e.g., Tuition, Lab Fee, Library Fine, Exam Fee, etc." 
+                           required 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 transition"
+                           list="fee_types">
+                    <datalist id="fee_types">
+                        <option>Tuition</option>
+                        <option>Lab Fee</option>
+                        <option>Library Fine</option>
+                        <option>Exam Fee</option>
+                        <option>Hostel Fee</option>
+                        <option>Activity Fee</option>
+                        <option>Development Fee</option>
+                    </datalist>
+                </div>
+
+                <!-- Two Column Layout for Amount and Due Date -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Amount -->
+                    <div class="space-y-3">
+                        <label for="amount" class="block text-gray-700 font-semibold">
+                            <i class="fas fa-rupee-sign text-blue-600 mr-2"></i>Amount (₹)
+                            <span class="text-red-600">*</span>
+                        </label>
+                        <input type="number" 
+                               id="amount" 
+                               name="amount" 
+                               value="{{ fee.amount }}" 
+                               placeholder="Enter amount" 
+                               required 
+                               step="0.01" 
+                               min="0" 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 transition">
+                    </div>
+
+                    <!-- Payment Deadline -->
+                    <div class="space-y-3">
+                        <label for="due_date" class="block text-gray-700 font-semibold">
+                            <i class="fas fa-calendar text-blue-600 mr-2"></i>Payment Deadline
+                            <span class="text-red-600">*</span>
+                        </label>
+                        <input type="date" 
+                               id="due_date" 
+                               name="due_date" 
+                               value="{{ fee.due_date.strftime('%Y-%m-%d') }}" 
+                               required 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 transition">
+                    </div>
+                </div>
+
+                <!-- Status -->
+                <div class="space-y-3">
+                    <label for="status" class="block text-gray-700 font-semibold">
+                        <i class="fas fa-info-circle text-blue-600 mr-2"></i>Status
+                        <span class="text-red-600">*</span>
+                    </label>
+                    <select id="status" 
+                            name="status" 
+                            required 
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 transition">
+                        <option value="pending" {% if fee.status == 'pending' %}selected{% endif %}>Pending</option>
+                        <option value="paid" {% if fee.status == 'paid' %}selected{% endif %}>Paid</option>
+                    </select>
+                </div>
+
+                <!-- Notes -->
+                <div class="space-y-3">
+                    <label for="notes" class="block text-gray-700 font-semibold">
+                        <i class="fas fa-notes-medical text-blue-600 mr-2"></i>Additional Notes (Optional)
+                    </label>
+                    <textarea id="notes" 
+                              name="notes" 
+                              rows="3" 
+                              placeholder="Add any additional information or special instructions..."
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 transition resize-none">{{ fee.notes or '' }}</textarea>
+                </div>
+
+                <!-- Fee Details -->
+                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <p class="text-xs text-gray-600 font-semibold uppercase mb-2">Fee Information</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
+                        <div>
+                            <span class="font-semibold">Semester:</span> {{ fee.semester }}
+                        </div>
+                        <div>
+                            <span class="font-semibold">Created:</span> {{ fee.created_at.strftime('%d-%m-%Y') }}
+                        </div>
+                        {% if fee.paid_date %}
+                        <div>
+                            <span class="font-semibold">Paid Date:</span> {{ fee.paid_date.strftime('%d-%m-%Y') }}
+                        </div>
+                        {% endif %}
+                        {% if fee.updated_at %}
+                        <div>
+                            <span class="font-semibold">Last Updated:</span> {{ fee.updated_at.strftime('%d-%m-%Y') }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Buttons -->
+                <div class="flex gap-4 pt-4">
+                    <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition shadow-lg hover:shadow-xl">
+                        <i class="fas fa-save mr-2"></i>Save Changes
+                    </button>
+                    <a href="{{ url_for('admin.manage_fees') }}" class="flex-1 text-center bg-gray-400 hover:bg-gray-500 text-white font-bold py-3 px-6 rounded-lg transition shadow-lg hover:shadow-xl">
+                        <i class="fas fa-times mr-2"></i>Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

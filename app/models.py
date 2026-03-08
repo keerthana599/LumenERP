@@ -190,6 +190,7 @@ class Fee(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     student_id = db.Column(db.Integer, db.ForeignKey('students.id'), nullable=False)
+    fee_type = db.Column(db.String(100), nullable=False, default='Tuition')  # 'Tuition', 'Lab Fee', 'Library Fine', etc.
     semester = db.Column(db.Integer, nullable=False)
     amount = db.Column(db.Float, nullable=False)
     status = db.Column(db.String(20), nullable=False, default='pending')  # 'pending', 'paid'
@@ -197,11 +198,12 @@ class Fee(db.Model):
     due_date = db.Column(db.Date)
     notes = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
-    __table_args__ = (db.UniqueConstraint('student_id', 'semester', name='uq_student_semester'),)
+    __table_args__ = (db.UniqueConstraint('student_id', 'semester', 'fee_type', name='uq_student_semester_fee_type'),)
     
     def __repr__(self):
-        return f'<Fee {self.student_id} - Sem{self.semester}>'
+        return f'<Fee {self.student_id} - {self.fee_type}>'
 
 class Note(db.Model):
     """Study notes/materials model"""

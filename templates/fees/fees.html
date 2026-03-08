@@ -28,34 +28,69 @@
 
     <!-- Fee Structure Table -->
     <div class="bg-white rounded-lg shadow-md p-6">
-        <h2 class="text-xl font-bold text-gray-800 mb-4">Semester-wise Fees</h2>
+        <h2 class="text-xl font-bold text-gray-800 mb-4">Fee Management</h2>
         
         {% if fees %}
         <div class="overflow-x-auto border rounded-lg table-responsive">
             <table class="w-full text-sm">
                 <thead class="bg-gray-100 border-b">
                     <tr>
+                        <th class="px-4 py-3 text-left font-semibold">Fee Type</th>
                         <th class="px-4 py-3 text-left font-semibold">Semester</th>
                         <th class="px-4 py-3 text-left font-semibold">Amount</th>
                         <th class="px-4 py-3 text-left font-semibold">Status</th>
                         <th class="px-4 py-3 text-left font-semibold">Due Date</th>
                         <th class="px-4 py-3 text-left font-semibold">Paid Date</th>
+                        <th class="px-4 py-3 text-center font-semibold">Action</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y">
                     {% for fee in fees %}
                     <tr class="hover:bg-gray-50">
-                        <td class="px-4 py-3 font-semibold">Semester {{ fee.semester }}</td>
-                        <td class="px-4 py-3">₹{{ "%.0f"|format(fee.amount) }}</td>
+                        <td class="px-4 py-3">
+                            <span class="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-xs font-semibold">
+                                {{ fee.fee_type }}
+                            </span>
+                        </td>
+                        <td class="px-4 py-3 font-semibold">{{ fee.semester }}</td>
+                        <td class="px-4 py-3 font-semibold text-blue-600">₹{{ "%.0f"|format(fee.amount) }}</td>
                         <td class="px-4 py-3">
                             {% if fee.status == 'paid' %}
-                            <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-semibold">Paid</span>
+                            <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-semibold">
+                                <i class="fas fa-check-circle mr-1"></i>Paid
+                            </span>
                             {% else %}
-                            <span class="bg-red-100 text-red-800 px-3 py-1 rounded-full text-xs font-semibold">Pending</span>
+                            <span class="bg-red-100 text-red-800 px-3 py-1 rounded-full text-xs font-semibold">
+                                <i class="fas fa-hourglass-end mr-1"></i>Pending
+                            </span>
                             {% endif %}
                         </td>
-                        <td class="px-4 py-3">{{ fee.due_date.strftime('%d-%m-%Y') if fee.due_date else 'N/A' }}</td>
-                        <td class="px-4 py-3">{{ fee.paid_date.strftime('%d-%m-%Y') if fee.paid_date else 'Not Paid' }}</td>
+                        <td class="px-4 py-3 {% if fee.due_date and fee.due_date < now and fee.status == 'pending' %}font-semibold text-red-600{% else %}text-gray-600{% endif %}">
+                            {% if fee.due_date %}
+                                {{ fee.due_date.strftime('%d-%m-%Y') }}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-3">
+                            {% if fee.paid_date %}
+                                {{ fee.paid_date.strftime('%d-%m-%Y') }}
+                            {% else %}
+                                Not Paid
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-3 text-center">
+                            {% if fee.status == 'pending' %}
+                            <a href="{{ url_for('student.pay_fee', fee_id=fee.id) }}" 
+                               class="inline-flex items-center bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-xs font-semibold transition shadow hover:shadow-lg">
+                                <i class="fas fa-credit-card mr-1"></i> Pay Now
+                            </a>
+                            {% else %}
+                            <span class="text-gray-400 text-xs">
+                                <i class="fas fa-check-circle"></i> Completed
+                            </span>
+                            {% endif %}
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -63,7 +98,8 @@
         </div>
         {% else %}
         <div class="bg-blue-50 border-l-4 border-blue-500 p-4">
-            <p class="text-blue-800">No fee records found.</p>
+            <i class="fas fa-info-circle text-blue-600 mr-2"></i>
+            <p class="text-blue-800">No fee records found yet.</p>
         </div>
         {% endif %}
     </div>
@@ -75,6 +111,7 @@
             <li>Please ensure all dues are paid on or before the due date.</li>
             <li>Contact the admin office for payment method and clarifications.</li>
             <li>Late payment may attract additional penalties.</li>
+            <li>Once you pay a fee, the admin will update the status to "Paid".</li>
         </ul>
     </div>
 </div>

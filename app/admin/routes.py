@@ -1193,3 +1193,162 @@ def delete_notification(notification_id):
     
     flash('Notification deleted successfully.', 'success')
     return redirect(url_for('admin.manage_notifications'))
+
+# ==================== FEE MANAGEMENT ====================
+
+@admin_bp.route('/manage-fees')
+@login_required
+def manage_fees():
+    """Manage student fees"""
+    if current_user.role != 'admin':
+        flash('Unauthorized access.', 'danger')
+        return redirect(url_for('auth.login'))
+    
+    page = request.args.get('page', 1, type=int)
+    status_filter = request.args.get('status', 'all')
+    student_filter = request.args.get('student', '')
+    
+    query = Fee.query.join(Student).join(User)
+    
+    if status_filter != 'all':
+        query = query.filter(Fee.status == status_filter)
+    
+    if student_filter:
+        query = query.filter(
+            (Student.roll_no.ilike(f'%{student_filter}%')) | 
+            (User.username.ilike(f'%{student_filter}%'))
+        )
+    
+    fees = query.paginate(page=page, per_page=15)
+    
+    return render_template('admin/manage_fees.html', 
+                         fees=fees, 
+                         status_filter=status_filter,
+                         student_filter=student_filter,
+                         now=datetime.utcnow().date())
+
+@admin_bp.route('/add-fee', methods=['GET', 'POST'])
+@login_required
+def add_fee():
+    """Add fee for a student"""
+    if current_user.role != 'admin':
+        flash('Unauthorized access.', 'danger')
+        return redirect(url_for('auth.login'))
+    
+    if request.method == 'POST':
+        student_id = request.form.get('student_id', type=int)
+        fee_type = request.form.get('fee_type', '').strip()
+        semester = request.form.get('semester', type=int)
+        amount = request.form.get('amount', type=float)
+        due_date_str = request.form.get('due_date', '')
+        notes = request.form.get('notes', '').strip()
+        
+        if not all([student_id, fee_type, semester, amount, due_date_str]):
+            flash('Student, fee type, semester, amount, and due date are required.', 'danger')
+            return redirect(url_for('admin.add_fee'))
+        
+        student = Student.query.get(student_id)
+        if not student:
+            flash('Student not found.', 'danger')
+            return redirect(url_for('admin.add_fee'))
+        
+        # Check if fee already exists for this student, semester, and fee type
+        existing_fee = Fee.query.filter_by(
+            student_id=student_id,
+            semester=semester,
+            fee_type=fee_type
+        ).first()
+        
+        if existing_fee:
+            flash('A fee of this type already exists for this student in this semester.', 'danger')
+            return redirect(url_for('admin.add_fee'))
+        
+        try:
+            due_date = datetime.strptime(due_date_str, '%Y-%m-%d').date()
+        except ValueError:
+            flash('Invalid date format. Use YYYY-MM-DD.', 'danger')
+            return redirect(url_for('admin.add_fee'))
+        
+        fee = Fee(
+            student_id=student_id,
+            fee_type=fee_type,
+            semester=semester,
+            amount=amount,
+            due_date=due_date,
+            notes=notes,
+            status='pending'
+        )
+        
+        db.session.add(fee)
+        db.session.commit()
+        
+        # Create notification for the student
+        notification = Notification(
+            title=f'New Fee Assigned: {fee_type}',
+            message=f'A {fee_type} fee of ₹{amount} has been assigned to you for Semester {semester}. Due date: {due_date.strftime("%d-%m-%Y")}',
+            notification_type='alert',
+            target_audience='students',
+            created_by=current_user.username
+        )
+        db.session.add(notification)
+        db.session.commit()
+        
+        flash('Fee added successfully and notification sent to student.', 'success')
+        return redirect(url_for('admin.manage_fees'))
+    
+    students = Student.query.join(User).order_by(User.username).all()
+    semesters = list(range(1, 9))
+    
+    return render_template('admin/add_fee.html', 
+                         students=students,
+                         semesters=semesters)
+
+@admin_bp.route('/edit-fee/<int:fee_id>', methods=['GET', 'POST'])
+@login_required
+def edit_fee(fee_id):
+    """Edit fee"""
+    if current_user.role != 'admin':
+        flash('Unauthorized access.', 'danger')
+        return redirect(url_for('auth.login'))
+    
+    fee = Fee.query.get_or_404(fee_id)
+    
+    if request.method == 'POST':
+        fee.fee_type = request.form.get('fee_type', '').strip()
+        fee.amount = request.form.get('amount', type=float)
+        due_date_str = request.form.get('due_date', '')
+        fee.notes = request.form.get('notes', '').strip()
+        fees_status = request.form.get('status', 'pending')
+        
+        if not all([fee.fee_type, fee.amount, due_date_str]):
+            flash('Fee type, amount, and due date are required.', 'danger')
+            return redirect(url_for('admin.edit_fee', fee_id=fee_id))
+        
+        try:
+            fee.due_date = datetime.strptime(due_date_str, '%Y-%m-%d').date()
+        except ValueError:
+            flash('Invalid date format. Use YYYY-MM-DD.', 'danger')
+            return redirect(url_for('admin.edit_fee', fee_id=fee_id))
+        
+        fee.status = fees_status
+        db.session.commit()
+        
+        flash('Fee updated successfully.', 'success')
+        return redirect(url_for('admin.manage_fees'))
+    
+    return render_template('admin/edit_fee.html', fee=fee)
+
+@admin_bp.route('/delete-fee/<int:fee_id>', methods=['POST'])
+@login_required
+def delete_fee(fee_id):
+    """Delete fee"""
+    if current_user.role != 'admin':
+        flash('Unauthorized access.', 'danger')
+        return redirect(url_for('auth.login'))
+    
+    fee = Fee.query.get_or_404(fee_id)
+    db.session.delete(fee)
+    db.session.commit()
+    
+    flash('Fee deleted successfully.', 'success')
+    return redirect(url_for('admin.manage_fees'))

@@ -161,7 +161,8 @@ def fees():
                          fees=fee_records,
                          total_fees=total_fees,
                          paid_fees=paid_fees,
-                         pending_fees=pending_fees)
+                         pending_fees=pending_fees,
+                         now=datetime.utcnow().date())
 
 @student_bp.route('/apply-leave', methods=['GET', 'POST'])
 @login_required
@@ -308,3 +309,72 @@ def download_certificate(cert_id):
         as_attachment=True,
         download_name=cert.file_name or 'certificate'
     )
+
+@student_bp.route('/pay-fee/<int:fee_id>', methods=['GET', 'POST'])
+@login_required
+def pay_fee(fee_id):
+    """Pay fee - shows payment gateway page"""
+    if current_user.role != 'student':
+        flash('Unauthorized access.', 'danger')
+        return redirect(url_for('auth.login'))
+    
+    student = current_user.student
+    fee = Fee.query.get_or_404(fee_id)
+    
+    # Verify the fee belongs to this student
+    if fee.student_id != student.id:
+        flash('Unauthorized access to this fee.', 'danger')
+        return redirect(url_for('student.fees'))
+    
+    # Check if already paid
+    if fee.status == 'paid':
+        flash('This fee has already been paid.', 'info')
+        return redirect(url_for('student.fees'))
+    
+    if request.method == 'POST':
+        payment_method = request.form.get('payment_method', '').strip()
+        
+        if not payment_method:
+            flash('Please select a payment method.', 'danger')
+            return redirect(url_for('student.pay_fee', fee_id=fee_id))
+        
+        # Simulate payment processing
+        # In production, this would integrate with actual payment gateway APIs
+        # like Razorpay, PayU, Paytm, Stripe, etc.
+        
+        transaction_id = f"TXN{datetime.utcnow().strftime('%Y%m%d%H%M%S')}{fee_id}"
+        
+        # Update fee status to paid
+        fee.status = 'paid'
+        fee.paid_date = datetime.utcnow()
+        fee.notes = f"{fee.notes or ''}\nPayment Method: {payment_method}\nTransaction ID: {transaction_id}".strip()
+        
+        db.session.commit()
+        
+        flash(f'Payment successful! Transaction ID: {transaction_id}', 'success')
+        return redirect(url_for('student.payment_success', fee_id=fee_id, transaction_id=transaction_id))
+    
+    return render_template('fees/pay_fee.html', fee=fee, student=student)
+
+@student_bp.route('/payment-success/<int:fee_id>')
+@login_required
+def payment_success(fee_id):
+    """Payment success page"""
+    if current_user.role != 'student':
+        flash('Unauthorized access.', 'danger')
+        return redirect(url_for('auth.login'))
+    
+    student = current_user.student
+    fee = Fee.query.get_or_404(fee_id)
+    
+    # Verify the fee belongs to this student
+    if fee.student_id != student.id:
+        flash('Unauthorized access.', 'danger')
+        return redirect(url_for('student.fees'))
+    
+    transaction_id = request.args.get('transaction_id', 'N/A')
+    
+    return render_template('fees/payment_success.html', 
+                         fee=fee, 
+                         student=student, 
+                         transaction_id=transaction_id)
